@@ -6,13 +6,13 @@ It works as extension methods of the DBContext class and is very simple to use. 
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
    
    
-###Installation
+### Installation
 You can install it using the
 <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">nuget package</a><br>
 
-##How to use it
+## How to use it
 
-###Bulk insert
+### Bulk insert
    There is two ways of using this method. By only using the list as parameters for this extension method it will perform a standard SqlBulkCopy operation, witch will not return the Ids of the inserted entities because of a limitation of the SqlBulkCopy class. 
    <br><br>
    By also selecting Identity.InputOutput as the second parameter, the method will fill the generated Ids for the entities inserted, using temporary tables to output and select the generated Ids under the hood. See the exemples below:
@@ -37,7 +37,7 @@ entityList.First().Id //would return the id generated on the insert.
    in the entities collection */
 ```
 
-####Workaround for relationships
+#### Workaround for relationships
    You can explicitly set the foreign keys of your entity and insert it. See the example below.
    
 ```c#
@@ -61,7 +61,7 @@ context.BulkInsert(entityList);
 /* By explicitly setting the foreing key the relationship will be persisted in the database. */
 ```
    
-###Bulk update
+### Bulk update
 ```c#
 using EntityFramework.BulkExtensions.Operations
 
@@ -88,7 +88,7 @@ context.BulkUpdate(entityList);
    a big performance hit with an increased number of entries to update. */
 ```
 
-###Bulk delete
+### Bulk delete
 ```c#
 using EntityFramework.BulkExtensions.Operations
 
@@ -102,7 +102,7 @@ context.BulkDelete(entityList);
 
 /* This operation will delete all the entities in the list from the database. */
 ```
-##Credits
+## Credits
 This library is based on the <a href="https://github.com/gtaylor44/SqlBulkTools">SqlBulkTools</a> by Greg Taylor.
 
 
