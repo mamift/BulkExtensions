@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Reflection;
 
@@ -56,6 +57,55 @@ namespace EntityFramework.BulkExtensions.Extensions
                 transaction = context.Database.BeginTransaction();
             }
             return transaction;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="collection"></param>
+        internal static void UpdateEntityState<TEntity>(this DbContext context, IEnumerable<TEntity> collection) where TEntity : class
+        {
+            try
+            {
+                var list = collection.ToList();
+                context.Configuration.AutoDetectChangesEnabled = false;
+
+                foreach (var entity in list)
+                {
+                    context.Entry(entity).State = EntityState.Unchanged;
+                }
+            }
+            finally
+            {
+                context.Configuration.AutoDetectChangesEnabled = true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="collection"></param>
+        internal static void DetachEntityFromContext<TEntity>(this DbContext context, IEnumerable<TEntity> collection) where TEntity : class
+        {
+            try
+            {
+                var list = collection.ToList();
+                var objectContext = ((IObjectContextAdapter)context).ObjectContext;
+
+                context.Configuration.AutoDetectChangesEnabled = false;
+                foreach (var entity in list)
+                {
+                    objectContext.Detach(entity);
+                }
+            }
+            finally
+            {
+                context.Configuration.AutoDetectChangesEnabled = true;
+            }
         }
 
         private static DataTable CreateDataTable<TEntity>(this DbContext context, bool primaryKeysOnly = false) where TEntity : class

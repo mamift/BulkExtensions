@@ -59,6 +59,7 @@ namespace EntityFramework.BulkExtensions.BulkOperations
 
                     //Load generated IDs from temporary output table into the entities.
                     database.LoadFromTmpOutputTable(tmpOutputTableName, context.GetTablePKs<TEntity>().First().ColumnName, entityList);
+                    context.UpdateEntityState(entityList);
                 }
                 else
                 {

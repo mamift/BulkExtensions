@@ -60,12 +60,13 @@ namespace EntityFramework.BulkExtensions.BulkOperations
 
                 //Commit if internal transaction exists.
                 transaction?.Commit();
+                context.UpdateEntityState(entityList);
                 return affectedRows;
             }
             catch (Exception)
             {
                 //Rollback if internal transaction exists.
-                transaction?.Rollback();
+                transaction?.Rollback();                
                 throw;
             }
         }

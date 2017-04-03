@@ -60,6 +60,7 @@ namespace EntityFramework.BulkExtensions.BulkOperations
 
                 //Commit if internal transaction exists.
                 transaction?.Commit();
+                context.DetachEntityFromContext(entityList);
                 return affectedRows;
             }
             catch (Exception)
