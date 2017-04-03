@@ -6,8 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using EntityFramework.BulkExtensions.Extensions;
-using EntityFramework.MappingAPI;
-using EntityFramework.MappingAPI.Extensions;
+using EntityFramework.BulkExtensions.Metadata;
 
 namespace EntityFramework.BulkExtensions.Helpers
 {
@@ -15,6 +14,8 @@ namespace EntityFramework.BulkExtensions.Helpers
     /// </summary>
     internal static class SqlHelper
     {
+        private const string Source = "Source";
+        private const string Target = "Target";
         private const int RandomLength = 6;
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <returns></returns>
         internal static string RandomTableName<TEntity>(this DbContext context)
         {
-            var schema = context.Db<TEntity>().Schema;
+            var schema = context.Metadata<TEntity>().Schema;
             return $"[{schema}].[_tmp{Guid.NewGuid().ToString().Substring(0, RandomLength)}]";
         }
 
@@ -44,11 +45,10 @@ namespace EntityFramework.BulkExtensions.Helpers
 
             command.Append($"CREATE TABLE {tableName}(");
 
-            var primitiveTypes = context.GetPrimitiveType<TEntity>();
             var paramList = columns
-                .Select(column => $"[{column.ColumnName}] {column.GetSchemaType(primitiveTypes[column.ColumnName])}")
+                .Select(column => $"[{column.ColumnName}] {column.GetSchemaType(column.DbType)}")
                 .ToList();
-            var paramListConcatenated = string.Join(", ", paramList);
+            var paramListConcatenated = String.Join(", ", paramList);
 
             command.Append(paramListConcatenated);
             command.Append(");");
@@ -107,8 +107,7 @@ namespace EntityFramework.BulkExtensions.Helpers
             {
                 if (column.IsPk) continue;
 
-                parameters.Add(
-                    $"[{Constants.Target}].[{column.ColumnName}] = [{Constants.Source}].[{column.ColumnName}]");
+                parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
             }
 
             command.Append(string.Join(", ", parameters) + " ");
@@ -127,11 +126,11 @@ namespace EntityFramework.BulkExtensions.Helpers
             var updateOn = context.GetTablePKs<TEntity>().ToList();
             var command = new StringBuilder();
 
-            command.Append($"ON [{Constants.Target}].[{updateOn.First().ColumnName}] = [{Constants.Source}].[{updateOn.First().ColumnName}] ");
+            command.Append($"ON [{Target}].[{updateOn.First().ColumnName}] = [{Source}].[{updateOn.First().ColumnName}] ");
 
             if (updateOn.Count > 1)
                 foreach (var key in updateOn.Skip(1))
-                    command.Append($"AND [{Constants.Target}].[{key.ColumnName}] = [{Constants.Source}].[{key.ColumnName}]");
+                    command.Append($"AND [{Target}].[{key.ColumnName}] = [{Source}].[{key.ColumnName}]");
 
             return command.ToString();
         }
@@ -204,10 +203,10 @@ namespace EntityFramework.BulkExtensions.Helpers
             foreach (var column in columns.ToList())
             {
                 if (((identityColumn == null) || (column == identityColumn)) && (identityColumn != null)) continue;
-                selectColumns.Add($"[{Constants.Source}].[{column}]");
+                selectColumns.Add($"[{Source}].[{column}]");
             }
 
-            command.Append(string.Join(", ", selectColumns));
+            command.Append(String.Join(", ", selectColumns));
 
             return command.ToString();
         }
@@ -225,7 +224,7 @@ namespace EntityFramework.BulkExtensions.Helpers
                 if (column != identityColumn)
                     insertColumns.Add($"[{column}]");
 
-            command.Append(string.Join(", ", insertColumns));
+            command.Append(String.Join(", ", insertColumns));
             command.Append(") ");
 
             return command.ToString();
@@ -236,7 +235,7 @@ namespace EntityFramework.BulkExtensions.Helpers
             return $"CREATE TABLE {tmpTablename}([{identityColumn}] int); ";
         }
 
-        private static string GetSchemaType(this IPropertyMap column, string columnType)
+        private static string GetSchemaType(this PropertyMetadata column, string columnType)
         {
             switch (columnType)
             {
@@ -255,7 +254,6 @@ namespace EntityFramework.BulkExtensions.Helpers
                     break;
                 case "datetime2":
                 case "time":
-                    //columnType = columnType + "(" + column. + ")";
                     break;
             }
 
