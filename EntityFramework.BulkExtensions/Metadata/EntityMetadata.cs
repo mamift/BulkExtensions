@@ -14,10 +14,12 @@ namespace EntityFramework.BulkExtensions.Metadata
 
         public IEnumerable<PropertyMetadata> Pks
         {
-            get
-            {
-                return Properties.Where(metadata => metadata.IsPk);
-            }
+            get { return Properties.Where(metadata => metadata.IsPk); }
+        }
+
+        public string FullTableName
+        {
+            get { return $"{Schema}.{TableName}"; }
         }
     }
 }

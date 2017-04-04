@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Core;
 using System.Data.SqlClient;
 using System.Linq;
 using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Helpers;
+using EntityFramework.BulkExtensions.Metadata;
 using EntityFramework.BulkExtensions.Operations;
 
 namespace EntityFramework.BulkExtensions.BulkOperations
@@ -22,11 +22,8 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            if (!context.Exists<TEntity>())
-            {
-                throw new EntityException(@"Entity is not being mapped by Entity Framework. Check your model.");
-            }
-            var tmpTableName = context.RandomTableName<TEntity>();
+            var metadata = context.Metadata<TEntity>();
+            var tmpTableName = metadata.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
             var affectedRows = 0;
@@ -40,31 +37,31 @@ namespace EntityFramework.BulkExtensions.BulkOperations
             try
             {
                 //Cconvert entity collection into a DataTable
-                var dataTable = context.ToDataTable(entityList);
+                var dataTable = entityList.ToDataTable(metadata);
 
                 //Return generated IDs for bulk inserted elements.
                 if (identity == Identity.InputOutput)
                 {
                     //Create temporary table.
-                    var command = context.BuildCreateTempTable<TEntity>(tmpTableName);
+                    var command = metadata.CreateTempTable(tmpTableName);
                     database.ExecuteSqlCommand(command);
 
                     //Bulk inset data to temporary temporary table.
                     database.BulkInsertToTable(dataTable, tmpTableName, SqlBulkCopyOptions.Default);
 
-                    var tmpOutputTableName = context.RandomTableName<TEntity>();
+                    var tmpOutputTableName = metadata.RandomTableName();
                     //Copy data from temporary table to destination table with ID output to another temporary table.
-                    var commandText = context.GetInsertIntoStagingTableCmd<TEntity>(tmpOutputTableName, tmpTableName, context.GetTablePKs<TEntity>().First().ColumnName);
+                    var commandText = metadata.GetInsertIntoStagingTableCmd(tmpOutputTableName, tmpTableName, metadata.Pks.First().ColumnName);
                     database.ExecuteSqlCommand(commandText);
 
                     //Load generated IDs from temporary output table into the entities.
-                    database.LoadFromTmpOutputTable(tmpOutputTableName, context.GetTablePKs<TEntity>().First().ColumnName, entityList);
-                    context.UpdateEntityState(entityList);
+                    database.LoadFromTmpOutputTable(tmpOutputTableName, metadata.Pks.First().ColumnName, entityList);
+                    //context.UpdateEntityState(entityList);
                 }
                 else
                 {
                     //Bulk inset data to temporary destination table.
-                    database.BulkInsertToTable(dataTable, context.GetTableName<TEntity>(), SqlBulkCopyOptions.Default);
+                    database.BulkInsertToTable(dataTable, metadata.FullTableName, SqlBulkCopyOptions.Default);
                 }
 
                 affectedRows = dataTable.Rows.Count;

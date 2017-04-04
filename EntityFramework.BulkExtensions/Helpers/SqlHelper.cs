@@ -5,7 +5,6 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Metadata;
 
 namespace EntityFramework.BulkExtensions.Helpers
@@ -21,26 +20,23 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
+        /// <param name="metadata"></param>
         /// <returns></returns>
-        internal static string RandomTableName<TEntity>(this DbContext context)
+        internal static string RandomTableName(this EntityMetadata metadata)
         {
-            var schema = context.Metadata<TEntity>().Schema;
-            return $"[{schema}].[_tmp{Guid.NewGuid().ToString().Substring(0, RandomLength)}]";
+            return $"[{metadata.Schema}].[_tmp{Guid.NewGuid().ToString().Substring(0, RandomLength)}]";
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
+        /// <param name="metadata"></param>
         /// <param name="tableName"></param>
         /// <param name="primaryKeysOnly"></param>
         /// <returns></returns>
-        internal static string BuildCreateTempTable<TEntity>(this DbContext context, string tableName, bool primaryKeysOnly = false) where TEntity : class
+        internal static string CreateTempTable(this EntityMetadata metadata, string tableName, bool primaryKeysOnly = false)
         {
-            var columns = primaryKeysOnly ? context.GetTablePKs<TEntity>() : context.GetTableColumns<TEntity>();
+            var columns = primaryKeysOnly ? metadata.Pks : metadata.Properties;
             var command = new StringBuilder();
 
             command.Append($"CREATE TABLE {tableName}(");
@@ -48,7 +44,7 @@ namespace EntityFramework.BulkExtensions.Helpers
             var paramList = columns
                 .Select(column => $"[{column.ColumnName}] {column.GetSchemaType(column.DbType)}")
                 .ToList();
-            var paramListConcatenated = String.Join(", ", paramList);
+            var paramListConcatenated = string.Join(", ", paramList);
 
             command.Append(paramListConcatenated);
             command.Append(");");
@@ -58,16 +54,16 @@ namespace EntityFramework.BulkExtensions.Helpers
 
         /// <summary>
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="database"></param>
         /// <param name="dataTable"></param>
         /// <param name="tableName"></param>
         /// <param name="sqlBulkCopyOptions"></param>
-        internal static void BulkInsertToTable(this Database context, DataTable dataTable, string tableName,
+        internal static void BulkInsertToTable(this Database database, DataTable dataTable, string tableName,
             SqlBulkCopyOptions sqlBulkCopyOptions)
         {
             using (
-                var bulkcopy = new SqlBulkCopy((SqlConnection)context.Connection, sqlBulkCopyOptions,
-                    (SqlTransaction)context.CurrentTransaction.UnderlyingTransaction))
+                var bulkcopy = new SqlBulkCopy((SqlConnection)database.Connection, sqlBulkCopyOptions,
+                    (SqlTransaction)database.CurrentTransaction.UnderlyingTransaction))
             {
                 foreach (var dataTableColumn in dataTable.Columns)
                 {
@@ -75,7 +71,7 @@ namespace EntityFramework.BulkExtensions.Helpers
                 }
 
                 bulkcopy.DestinationTableName = tableName;
-                bulkcopy.BulkCopyTimeout = context.Connection.ConnectionTimeout;
+                bulkcopy.BulkCopyTimeout = database.Connection.ConnectionTimeout;
                 bulkcopy.WriteToServer(dataTable);
             }
         }
@@ -92,18 +88,16 @@ namespace EntityFramework.BulkExtensions.Helpers
 
         /// <summary>
         /// </summary>
-        /// <param name="context"></param>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="metadata"></param>
         /// <returns></returns>
-        internal static string BuildUpdateSet<TEntity>(this DbContext context) where TEntity : class
+        internal static string BuildUpdateSet(this EntityMetadata metadata)
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
-            var tableColumns = context.GetTableColumns<TEntity>();
 
             command.Append("SET ");
 
-            foreach (var column in tableColumns)
+            foreach (var column in metadata.Properties)
             {
                 if (column.IsPk) continue;
 
@@ -118,12 +112,11 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
+        /// <param name="metadata"></param>
         /// <returns></returns>
-        internal static string PrimaryKeysComparator<TEntity>(this DbContext context) where TEntity : class
+        internal static string PrimaryKeysComparator(this EntityMetadata metadata)
         {
-            var updateOn = context.GetTablePKs<TEntity>().ToList();
+            var updateOn = metadata.Pks.ToList();
             var command = new StringBuilder();
 
             command.Append($"ON [{Target}].[{updateOn.First().ColumnName}] = [{Source}].[{updateOn.First().ColumnName}] ");
@@ -138,20 +131,18 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
+        /// <param name="metadata"></param>
         /// <param name="tmpOutputTableName"></param>
         /// <param name="tmpTableName"></param>
         /// <param name="identityColumn"></param>
         /// <returns></returns>
-        internal static string GetInsertIntoStagingTableCmd<TEntity>(this DbContext context, string tmpOutputTableName,
-            string tmpTableName, string identityColumn) where TEntity : class
+        internal static string GetInsertIntoStagingTableCmd(this EntityMetadata metadata, string tmpOutputTableName,
+            string tmpTableName, string identityColumn)
         {
-            var fullTableName = context.GetTableName<TEntity>();
-            var columns = context.GetTableColumns<TEntity>().Select(map => map.ColumnName).ToList();
+            var columns = metadata.Properties.Select(propertyMetadata => propertyMetadata.ColumnName).ToList();
 
             var comm = GetOutputCreateTableCmd(tmpOutputTableName, identityColumn)
-                       + BuildInsertIntoSet(columns, identityColumn, fullTableName)
+                       + BuildInsertIntoSet(columns, identityColumn, metadata.FullTableName)
                        + $"OUTPUT INSERTED.{identityColumn} INTO "
                        + tmpOutputTableName + $"([{identityColumn}]) "
                        + BuildSelectSet(columns, identityColumn)
@@ -206,7 +197,7 @@ namespace EntityFramework.BulkExtensions.Helpers
                 selectColumns.Add($"[{Source}].[{column}]");
             }
 
-            command.Append(String.Join(", ", selectColumns));
+            command.Append(string.Join(", ", selectColumns));
 
             return command.ToString();
         }
@@ -224,7 +215,7 @@ namespace EntityFramework.BulkExtensions.Helpers
                 if (column != identityColumn)
                     insertColumns.Add($"[{column}]");
 
-            command.Append(String.Join(", ", insertColumns));
+            command.Append(string.Join(", ", insertColumns));
             command.Append(") ");
 
             return command.ToString();

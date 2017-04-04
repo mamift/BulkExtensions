@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Core;
 using System.Data.SqlClient;
 using System.Linq;
 using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Helpers;
+using EntityFramework.BulkExtensions.Metadata;
 using EntityFramework.BulkExtensions.Operations;
 
 namespace EntityFramework.BulkExtensions.BulkOperations
@@ -25,11 +25,8 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            if (!context.Exists<TEntity>())
-            {
-                throw new EntityException(@"Entity is not being mapped by Entity Framework. Check your model.");
-            }
-            var tmpTableName = context.RandomTableName<TEntity>();
+            var metadata = context.Metadata<TEntity>();
+            var tmpTableName = metadata.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
             var affectedRows = 0;
@@ -43,17 +40,17 @@ namespace EntityFramework.BulkExtensions.BulkOperations
             try
             {
                 //Cconvert entity collection into a DataTable with only the primary keys.
-                var dataTable = context.ToDataTable(entityList, true);
+                var dataTable = entityList.ToDataTable(metadata, true);
                 //Create temporary table with only the primary keys.
-                var command = context.BuildCreateTempTable<TEntity>(tmpTableName, true);
+                var command = metadata.CreateTempTable(tmpTableName, true);
                 database.ExecuteSqlCommand(command);
 
                 //Bulk inset data to temporary temporary table.
                 database.BulkInsertToTable(dataTable, tmpTableName, SqlBulkCopyOptions.Default);
 
                 //Merge delete items from the target table that matches ids from the temporary table.
-                command = $"MERGE INTO {context.GetTableName<TEntity>()} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                          $"{context.PrimaryKeysComparator<TEntity>()} WHEN MATCHED THEN DELETE;" +
+                command = $"MERGE INTO {metadata.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
+                          $"{metadata.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
                           SqlHelper.GetDropTableCommand(tmpTableName);
 
                 affectedRows = database.ExecuteSqlCommand(command);

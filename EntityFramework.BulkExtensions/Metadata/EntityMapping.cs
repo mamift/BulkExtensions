@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Core;
 using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
@@ -88,6 +89,8 @@ namespace EntityFramework.BulkExtensions.Metadata
             var entityType = metadata
                     .GetItems<EntityType>(DataSpace.OSpace)
                     .Single(e => objectItemCollection.GetClrType(e) == typeof(T));
+            if (entityType == null)
+                throw new EntityException(@"Entity is not being mapped by Entity Framework. Check your model.");
 
             var entitySet = metadata
                 .GetItems<EntityContainer>(DataSpace.CSpace)
