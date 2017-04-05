@@ -6,6 +6,7 @@ using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using EntityFramework.BulkExtensions.BulkOperations;
 
 namespace EntityFramework.BulkExtensions.Metadata
 {
@@ -16,41 +17,80 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
+        /// <param name="operation"></param>
         /// <returns></returns>
-        internal static EntityMetadata Metadata<T>(this DbContext context)
+        internal static EntityMetadata Metadata<T>(this DbContext context, OperationType operation)
         {
             var entityTypeMapping = context.GetEntityMapping<T>();
-            var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.Single()).First();
+            var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
             var entityType = typeof(T);
 
+            var properties = entityTypeMapping.GetPropertyMetadata();
             var entityMetadata = new EntityMetadata
             {
                 TableName = mappings.GetTableName(),
                 Schema = mappings.GetTableSchema(),
                 EntityName = entityType.Name,
-                EntityType = entityType,
-                Properties = entityTypeMapping.GetPropertyMetadata()
+                EntityType = entityType
             };
 
-            if (entityMetadata.Properties.Any(metadata => metadata.IsHierarchyMapping))
+            if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping) && operation == OperationType.Insert)
             {
                 var typeMappings = entityTypeMapping
-                    .Where(typeMapping => !typeMapping.IsHierarchyMapping);
+                    .Where(typeMapping => !typeMapping.IsHierarchyMapping)
+                    .ToList();
 
-                entityMetadata.HierarchyMapping = new Dictionary<string, string>();
-                foreach (var typeMapping in typeMappings)
-                {
-                    var mappingKey = typeMapping.EntityType.Name;
-                    var mappingValue = typeMapping.Fragments
-                        .First().Conditions
-                        .OfType<ValueConditionMapping>()
-                        .First(conditionMapping => conditionMapping.Property == null)
-                        .Value;
-                    entityMetadata.HierarchyMapping.Add(mappingKey, mappingValue.ToString());
-                }
+                entityMetadata.HierarchyMapping = GetHierarchyMappings(typeMappings);
+                properties.Add(GetDiscriminatorProperty(typeMappings));
             }
 
+            entityMetadata.Properties = properties;
             return entityMetadata;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="typeMappings"></param>
+        /// <returns></returns>
+        private static PropertyMetadata GetDiscriminatorProperty(IEnumerable<EntityTypeMapping> typeMappings)
+        {
+            var discriminator = typeMappings
+                .SelectMany(
+                    typeMapping =>
+                        typeMapping.Fragments.SelectMany(
+                            fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
+                .First(conditionMapping => conditionMapping.Property == null);
+
+            return new PropertyMetadata
+            {
+                ColumnName = discriminator.Column.Name,
+                DbType = discriminator.Column.TypeName,
+                MaxLength = discriminator.Column.MaxLength,
+                Type = typeof(string),
+                IsHierarchyMapping = true
+            };
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="typeMappings"></param>
+        /// <returns></returns>
+        private static Dictionary<string, string> GetHierarchyMappings(IEnumerable<EntityTypeMapping> typeMappings)
+        {
+            var hierarchyMapping = new Dictionary<string, string>();
+            foreach (var typeMapping in typeMappings)
+            {
+                var mappingKey = typeMapping.EntityType.Name;
+                var mappingValue = typeMapping.Fragments
+                    .First().Conditions
+                    .OfType<ValueConditionMapping>()
+                    .First(conditionMapping => conditionMapping.Property == null)
+                    .Value;
+                hierarchyMapping.Add(mappingKey, mappingValue.ToString());
+            }
+            return hierarchyMapping;
         }
 
         /// <summary>
@@ -58,7 +98,7 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// </summary>
         /// <param name="entityTypeMapping"></param>
         /// <returns></returns>
-        private static IEnumerable<PropertyMetadata> GetPropertyMetadata(this IEnumerable<EntityTypeMapping> entityTypeMapping)
+        private static IList<PropertyMetadata> GetPropertyMetadata(this IEnumerable<EntityTypeMapping> entityTypeMapping)
         {
             var typeMappings = entityTypeMapping.ToList();
             var mapping = typeMappings.Select(typeMapping => typeMapping.Fragments.First());
@@ -86,26 +126,6 @@ namespace EntityFramework.BulkExtensions.Metadata
                     });
                 }
             });
-
-            if (typeMappings.Any(typeMapping => typeMapping.IsHierarchyMapping))
-            {
-                var discriminator = typeMappings
-                    .Where(typeMapping => !typeMapping.IsHierarchyMapping)
-                    .SelectMany(
-                        typeMapping =>
-                            typeMapping.Fragments.SelectMany(
-                                fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
-                    .First(conditionMapping => conditionMapping.Property == null);
-
-                propertyMetadatas.Add(new PropertyMetadata
-                {
-                    ColumnName = discriminator.Column.Name,
-                    DbType = discriminator.Column.TypeName,
-                    MaxLength = discriminator.Column.MaxLength,
-                    Type = typeof(string),
-                    IsHierarchyMapping = true
-                });
-            }
 
             return propertyMetadatas;
         }
@@ -146,7 +166,7 @@ namespace EntityFramework.BulkExtensions.Metadata
                     .GetItems<EntityType>(DataSpace.OSpace)
                     .Single(e => objectItemCollection.GetClrType(e) == typeof(T));
             if (entityType == null)
-                throw new EntityException(@"Entity is not being mapped by Entity Framework. Check your model.");
+                throw new EntityException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
             var entitySet = metadata
                 .GetItems<EntityContainer>(DataSpace.CSpace)

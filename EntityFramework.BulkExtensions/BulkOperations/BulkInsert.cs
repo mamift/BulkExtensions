@@ -22,7 +22,7 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            var metadata = context.Metadata<TEntity>();
+            var metadata = context.Metadata<TEntity>(OperationType.Insert);
             var tmpTableName = metadata.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
@@ -40,7 +40,7 @@ namespace EntityFramework.BulkExtensions.BulkOperations
                 var dataTable = entityList.ToDataTable(metadata);
 
                 //Return generated IDs for bulk inserted elements.
-                if (identity == Identity.InputOutput)
+                if (identity == Identity.Output)
                 {
                     //Create temporary table.
                     var command = metadata.CreateTempTable(tmpTableName);

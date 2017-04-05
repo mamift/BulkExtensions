@@ -25,7 +25,7 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            var metadata = context.Metadata<TEntity>();
+            var metadata = context.Metadata<TEntity>(OperationType.Delete);
             var tmpTableName = metadata.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;

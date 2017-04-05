@@ -26,4 +26,11 @@
             }
         }
     }
+
+    internal enum OperationType
+    {
+        Insert,
+        Update,
+        Delete
+    }
 }

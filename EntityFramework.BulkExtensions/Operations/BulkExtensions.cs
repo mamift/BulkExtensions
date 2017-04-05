@@ -49,6 +49,6 @@ namespace EntityFramework.BulkExtensions.Operations
 
     public enum Identity
     {
-        InputOnly, InputOutput
+        InputOnly, Output
     }
 }
