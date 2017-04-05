@@ -21,5 +21,7 @@ namespace EntityFramework.BulkExtensions.Metadata
         {
             get { return $"{Schema}.{TableName}"; }
         }
+
+        public Dictionary<string, string> HierarchyMapping { get; set; }
     }
 }

@@ -12,5 +12,6 @@ namespace EntityFramework.BulkExtensions.Metadata
         public byte? Scale { get; set; }
         public int? MaxLength { get; set; }
         public bool IsPk { get; set; }
+        public bool IsHierarchyMapping { get; set; }
     }
 }

@@ -21,16 +21,20 @@ namespace EntityFramework.BulkExtensions.Extensions
         {
             var tb = CreateDataTable(metadata, primaryKeysOnly);
             var tableColumns = primaryKeysOnly ? metadata.Pks.ToList() : metadata.Properties.ToList();
-            var props = metadata.EntityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var item in entities)
             {
+                var props = item.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
                 var values = new List<object>();
                 foreach (var column in tableColumns)
                 {
                     var prop = props.SingleOrDefault(info => info.Name == column.PropertyName);
                     if (prop != null)
                         values.Add(prop.GetValue(item, null));
+                    else if (column.IsHierarchyMapping)
+                        values.Add(metadata.HierarchyMapping[item.GetType().Name]);
+                    else
+                        values.Add(null);
                 }
 
                 tb.Rows.Add(values.ToArray());
