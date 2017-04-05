@@ -19,7 +19,7 @@ namespace EntityFramework.BulkExtensions.Metadata
 
         public string FullTableName
         {
-            get { return $"{Schema}.{TableName}"; }
+            get { return $"[{Schema}].[{TableName}]"; }
         }
 
         public Dictionary<string, string> HierarchyMapping { get; set; }

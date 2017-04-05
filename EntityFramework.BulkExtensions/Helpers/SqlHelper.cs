@@ -15,7 +15,6 @@ namespace EntityFramework.BulkExtensions.Helpers
     {
         private const string Source = "Source";
         private const string Target = "Target";
-        private const int RandomLength = 6;
 
         /// <summary>
         /// 
@@ -24,7 +23,7 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <returns></returns>
         internal static string RandomTableName(this EntityMetadata metadata)
         {
-            return $"[{metadata.Schema}].[_tmp{Guid.NewGuid().ToString().Substring(0, RandomLength)}]";
+            return $"[{metadata.Schema}].[_{metadata.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
 
         /// <summary>
