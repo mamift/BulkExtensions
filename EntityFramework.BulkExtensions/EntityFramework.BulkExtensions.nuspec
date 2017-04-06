@@ -11,7 +11,7 @@
     <iconUrl>https://cdn3.iconfinder.com/data/icons/essential-rounded/66/Rounded-06-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Removed the EntityFramework.MappingAPI dependency. Handling of EF metadata build from the ground up. Refactored code to use the new metadata handling more efficiently. Support Table-per-Hierarchy with Code First or Fluent.</releaseNotes>
+    <releaseNotes>See change log on the project page.</releaseNotes>
     <copyright>Copyright 2016 Tiago L. da Nóbrega</copyright>
     <tags>EntityFramework bulk operations insert delete update extension</tags>
     <dependencies>

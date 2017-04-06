@@ -2,7 +2,7 @@
 
 namespace EntityFramework.BulkExtensions.Helpers
 {
-    public static class GuidHelper
+    internal static class GuidHelper
     {
         private const int RandomLength = 6;
 
