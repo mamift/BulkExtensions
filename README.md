@@ -11,7 +11,7 @@ It works as extension methods of the DBContext class and is very simple to use. 
 - Handling of the necessary EF metadata build from the ground up.
 - Changed some SQLHelper methods to use the new metadata objects instead of the DBContext.
 - Supports bulk operations for Class Hierarchy entities on Table-per-Hierarchy(TPH) mapping.
-- Supports both Code First and FluentAPI mappings.
+- Supports both Code First and FluentAPI configurations.
 - Changed 'Identity' enum value 'InputOutput' to 'Output'.
    
 ### Installation
