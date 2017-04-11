@@ -15,15 +15,15 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="operation"></param>
         /// <returns></returns>
-        internal static EntityMetadata Metadata<T>(this DbContext context, OperationType operation)
+        internal static EntityMetadata Metadata<TEntity>(this DbContext context, OperationType operation) where TEntity : class
         {
-            var entityTypeMapping = context.GetEntityMapping<T>();
+            var entityTypeMapping = context.GetEntityMapping<TEntity>();
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
-            var entityType = typeof(T);
+            var entityType = typeof(TEntity);
 
             var properties = entityTypeMapping.GetPropertyMetadata();
             var entityMetadata = new EntityMetadata
@@ -155,16 +155,16 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <returns></returns>
-        private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<T>(this DbContext context)
+        private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<TEntity>(this IObjectContextAdapter context) where TEntity : class
         {
-            var metadata = ((IObjectContextAdapter)context).ObjectContext.MetadataWorkspace;
+            var metadata = context.ObjectContext.MetadataWorkspace;
             var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
             var entityType = metadata
                     .GetItems<EntityType>(DataSpace.OSpace)
-                    .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(T));
+                    .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
             if (entityType == null)
                 throw new EntityException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
