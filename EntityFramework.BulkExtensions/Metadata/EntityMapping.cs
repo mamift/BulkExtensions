@@ -122,7 +122,7 @@ namespace EntityFramework.BulkExtensions.Metadata
                         PropertyName = propertyMapping.Property.Name,
                         IsPk = typeMappings
                             .Where(typeMapping => !typeMapping.IsHierarchyMapping)
-                            .Any(typeMapping => typeMapping.EntityType.KeyProperties.Any(property => property.Name == propertyMapping.Column.Name))
+                            .Any(typeMapping => typeMapping.EntityType.KeyProperties.Any(property => property.Name == propertyMapping.Property.Name))
                     });
                 }
             });
@@ -164,7 +164,7 @@ namespace EntityFramework.BulkExtensions.Metadata
             var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
             var entityType = metadata
                     .GetItems<EntityType>(DataSpace.OSpace)
-                    .Single(e => objectItemCollection.GetClrType(e) == typeof(T));
+                    .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(T));
             if (entityType == null)
                 throw new EntityException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 

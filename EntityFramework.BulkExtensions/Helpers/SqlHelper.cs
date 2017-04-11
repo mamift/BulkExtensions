@@ -157,18 +157,18 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="tmpOutputTableName"></param>
-        /// <param name="identityColumn"></param>
+        /// <param name="propertyMetadata"></param>
         /// <param name="items"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this Database context, string tmpOutputTableName,
-            string identityColumn, IList<TEntity> items)
+            PropertyMetadata propertyMetadata, IList<TEntity> items)
         {
-            var command = $"SELECT {identityColumn} FROM {tmpOutputTableName} ORDER BY {identityColumn};";
+            var command = $"SELECT {propertyMetadata.ColumnName} FROM {tmpOutputTableName} ORDER BY {propertyMetadata.ColumnName};";
             var identities = context.SqlQuery<int>(command);
             var counter = 0;
 
             foreach (var result in identities)
             {
-                var property = items[counter].GetType().GetProperty(identityColumn);
+                var property = items[counter].GetType().GetProperty(propertyMetadata.PropertyName);
 
                 if (property.CanWrite)
                     property.SetValue(items[counter], result, null);
