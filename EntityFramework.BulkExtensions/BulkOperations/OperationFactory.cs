@@ -2,29 +2,11 @@
 {
     internal static class OperationFactory
     {
-        internal static IBulkOperation BulkInsert
-        {
-            get
-            {
-                return new BulkInsert();
-            }
-        }
+        internal static IBulkOperation BulkInsert => new BulkInsert();
 
-        internal static IBulkOperation BulkUpdate
-        {
-            get
-            {
-                return new BulkUpdate();
-            }
-        }
+        internal static IBulkOperation BulkUpdate => new BulkUpdate();
 
-        internal static IBulkOperation BulkDelete
-        {
-            get
-            {
-                return new BulkDelete();
-            }
-        }
+        internal static IBulkOperation BulkDelete => new BulkDelete();
     }
 
     internal enum OperationType
