@@ -104,6 +104,7 @@ namespace EntityFramework.BulkExtensions.Metadata
             var mapping = typeMappings.Select(typeMapping => typeMapping.Fragments.First());
             var scalarPropertyMappings = mapping
                 .SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
+                .Where(propertyMapping => propertyMapping.Column.StoreGeneratedPattern != StoreGeneratedPattern.Computed)
                 .ToList();
 
             var propertyMetadatas = new List<PropertyMetadata>();
