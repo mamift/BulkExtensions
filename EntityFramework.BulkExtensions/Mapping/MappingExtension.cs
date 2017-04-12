@@ -161,7 +161,7 @@ namespace EntityFramework.BulkExtensions.Mapping
         private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<TEntity>(this IObjectContextAdapter context) where TEntity : class
         {
             var metadata = context.ObjectContext.MetadataWorkspace;
-            var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
+            var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
             var entityType = metadata
                     .GetItems<EntityType>(DataSpace.OSpace)
                     .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
