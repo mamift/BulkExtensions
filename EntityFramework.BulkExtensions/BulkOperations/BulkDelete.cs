@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Helpers;
-using EntityFramework.BulkExtensions.Metadata;
+using EntityFramework.BulkExtensions.Mapping;
 using EntityFramework.BulkExtensions.Operations;
 
 namespace EntityFramework.BulkExtensions.BulkOperations
@@ -25,8 +25,8 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            var metadata = context.Metadata<TEntity>(OperationType.Delete);
-            var tmpTableName = metadata.RandomTableName();
+            var mapping = context.Mapping<TEntity>(OperationType.Delete);
+            var tmpTableName = mapping.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
             var affectedRows = 0;
@@ -40,17 +40,17 @@ namespace EntityFramework.BulkExtensions.BulkOperations
             try
             {
                 //Cconvert entity collection into a DataTable with only the primary keys.
-                var dataTable = entityList.ToDataTable(metadata, true);
+                var dataTable = entityList.ToDataTable(mapping, true);
                 //Create temporary table with only the primary keys.
-                var command = metadata.CreateTempTable(tmpTableName, true);
+                var command = mapping.CreateTempTable(tmpTableName, true);
                 database.ExecuteSqlCommand(command);
 
                 //Bulk inset data to temporary temporary table.
                 database.BulkInsertToTable(dataTable, tmpTableName, SqlBulkCopyOptions.Default);
 
                 //Merge delete items from the target table that matches ids from the temporary table.
-                command = $"MERGE INTO {metadata.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                          $"{metadata.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
+                command = $"MERGE INTO {mapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
+                          $"{mapping.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
                           SqlHelper.GetDropTableCommand(tmpTableName);
 
                 affectedRows = database.ExecuteSqlCommand(command);

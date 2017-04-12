@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using EntityFramework.BulkExtensions.Metadata;
+using EntityFramework.BulkExtensions.Mapping;
 
 namespace EntityFramework.BulkExtensions.Extensions
 {
@@ -12,15 +12,15 @@ namespace EntityFramework.BulkExtensions.Extensions
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <param name="entities"></param>
         /// <param name="primaryKeysOnly"></param>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, EntityMetadata metadata, bool primaryKeysOnly = false) where TEntity : class
+        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, EntityMapping mapping, bool primaryKeysOnly = false) where TEntity : class
         {
-            var tb = CreateDataTable(metadata, primaryKeysOnly);
-            var tableColumns = primaryKeysOnly ? metadata.Pks.ToList() : metadata.Properties.ToList();
+            var tb = CreateDataTable(mapping, primaryKeysOnly);
+            var tableColumns = primaryKeysOnly ? mapping.Pks.ToList() : mapping.Properties.ToList();
 
             foreach (var item in entities)
             {
@@ -32,7 +32,7 @@ namespace EntityFramework.BulkExtensions.Extensions
                     if (prop != null)
                         values.Add(prop.GetValue(item, null));
                     else if (column.IsHierarchyMapping)
-                        values.Add(metadata.HierarchyMapping[item.GetType().Name]);
+                        values.Add(mapping.HierarchyMapping[item.GetType().Name]);
                     else
                         values.Add(null);
                 }
@@ -43,16 +43,16 @@ namespace EntityFramework.BulkExtensions.Extensions
             return tb;
         }
 
-        private static DataTable CreateDataTable(EntityMetadata metadata, bool primaryKeysOnly = false)
+        private static DataTable CreateDataTable(EntityMapping mapping, bool primaryKeysOnly = false)
         {
             var table = new DataTable();
-            var columns = primaryKeysOnly ? metadata.Pks : metadata.Properties;
+            var columns = primaryKeysOnly ? mapping.Pks : mapping.Properties;
             foreach (var prop in columns)
             {
                 table.Columns.Add(prop.ColumnName, Nullable.GetUnderlyingType(prop.Type) ?? prop.Type);
             }
 
-            table.TableName = metadata.EntityName;
+            table.TableName = mapping.EntityName;
             return table;
         }
     }

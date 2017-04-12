@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace EntityFramework.BulkExtensions.Metadata
+namespace EntityFramework.BulkExtensions.Mapping
 {
-    internal class PropertyMetadata
+    internal class PropertyMapping
     {
         public Type Type { get; set; }
         public string DbType { get; set; }

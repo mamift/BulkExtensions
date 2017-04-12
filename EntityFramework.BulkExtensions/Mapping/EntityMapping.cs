@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityFramework.BulkExtensions.Metadata
+namespace EntityFramework.BulkExtensions.Mapping
 {
-    internal class EntityMetadata
+    internal class EntityMapping
     {
         public Type EntityType { get; set; }
         public string EntityName { get; set; }
         public string TableName { get; set; }
         public string Schema { get; set; }
-        public IEnumerable<PropertyMetadata> Properties { get; set; }
+        public IEnumerable<PropertyMapping> Properties { get; set; }
 
-        public IEnumerable<PropertyMetadata> Pks
+        public IEnumerable<PropertyMapping> Pks
         {
-            get { return Properties.Where(metadata => metadata.IsPk); }
+            get { return Properties.Where(propertyMapping => propertyMapping.IsPk); }
         }
 
         public string FullTableName

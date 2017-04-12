@@ -5,7 +5,7 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using EntityFramework.BulkExtensions.Metadata;
+using EntityFramework.BulkExtensions.Mapping;
 
 namespace EntityFramework.BulkExtensions.Helpers
 {
@@ -19,23 +19,23 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string RandomTableName(this EntityMetadata metadata)
+        internal static string RandomTableName(this EntityMapping mapping)
         {
-            return $"[{metadata.Schema}].[_{metadata.TableName}_{GuidHelper.GetRandomTableGuid()}]";
+            return $"[{mapping.Schema}].[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <param name="tableName"></param>
         /// <param name="primaryKeysOnly"></param>
         /// <returns></returns>
-        internal static string CreateTempTable(this EntityMetadata metadata, string tableName, bool primaryKeysOnly = false)
+        internal static string CreateTempTable(this EntityMapping mapping, string tableName, bool primaryKeysOnly = false)
         {
-            var columns = primaryKeysOnly ? metadata.Pks : metadata.Properties;
+            var columns = primaryKeysOnly ? mapping.Pks : mapping.Properties;
             var command = new StringBuilder();
 
             command.Append($"CREATE TABLE {tableName}(");
@@ -87,16 +87,16 @@ namespace EntityFramework.BulkExtensions.Helpers
 
         /// <summary>
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string BuildUpdateSet(this EntityMetadata metadata)
+        internal static string BuildUpdateSet(this EntityMapping mapping)
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
 
             command.Append("SET ");
 
-            foreach (var column in metadata.Properties)
+            foreach (var column in mapping.Properties)
             {
                 if (column.IsPk) continue;
 
@@ -111,11 +111,11 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string PrimaryKeysComparator(this EntityMetadata metadata)
+        internal static string PrimaryKeysComparator(this EntityMapping mapping)
         {
-            var updateOn = metadata.Pks.ToList();
+            var updateOn = mapping.Pks.ToList();
             var command = new StringBuilder();
 
             command.Append($"ON [{Target}].[{updateOn.First().ColumnName}] = [{Source}].[{updateOn.First().ColumnName}] ");
@@ -130,18 +130,18 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="metadata"></param>
+        /// <param name="mapping"></param>
         /// <param name="tmpOutputTableName"></param>
         /// <param name="tmpTableName"></param>
         /// <param name="identityColumn"></param>
         /// <returns></returns>
-        internal static string GetInsertIntoStagingTableCmd(this EntityMetadata metadata, string tmpOutputTableName,
+        internal static string GetInsertIntoStagingTableCmd(this EntityMapping mapping, string tmpOutputTableName,
             string tmpTableName, string identityColumn)
         {
-            var columns = metadata.Properties.Select(propertyMetadata => propertyMetadata.ColumnName).ToList();
+            var columns = mapping.Properties.Select(propertyMapping => propertyMapping.ColumnName).ToList();
 
             var comm = GetOutputCreateTableCmd(tmpOutputTableName, identityColumn)
-                       + BuildInsertIntoSet(columns, identityColumn, metadata.FullTableName)
+                       + BuildInsertIntoSet(columns, identityColumn, mapping.FullTableName)
                        + $"OUTPUT INSERTED.{identityColumn} INTO "
                        + tmpOutputTableName + $"([{identityColumn}]) "
                        + BuildSelectSet(columns, identityColumn)
@@ -157,18 +157,18 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="tmpOutputTableName"></param>
-        /// <param name="propertyMetadata"></param>
+        /// <param name="propertyMapping"></param>
         /// <param name="items"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this Database context, string tmpOutputTableName,
-            PropertyMetadata propertyMetadata, IList<TEntity> items)
+            PropertyMapping propertyMapping, IList<TEntity> items)
         {
-            var command = $"SELECT {propertyMetadata.ColumnName} FROM {tmpOutputTableName} ORDER BY {propertyMetadata.ColumnName};";
+            var command = $"SELECT {propertyMapping.ColumnName} FROM {tmpOutputTableName} ORDER BY {propertyMapping.ColumnName};";
             var identities = context.SqlQuery<int>(command);
             var counter = 0;
 
             foreach (var result in identities)
             {
-                var property = items[counter].GetType().GetProperty(propertyMetadata.PropertyName);
+                var property = items[counter].GetType().GetProperty(propertyMapping.PropertyName);
 
                 if (property.CanWrite)
                     property.SetValue(items[counter], result, null);
@@ -225,7 +225,7 @@ namespace EntityFramework.BulkExtensions.Helpers
             return $"CREATE TABLE {tmpTablename}([{identityColumn}] int); ";
         }
 
-        private static string GetSchemaType(this PropertyMetadata column, string columnType)
+        private static string GetSchemaType(this PropertyMapping column, string columnType)
         {
             switch (columnType)
             {

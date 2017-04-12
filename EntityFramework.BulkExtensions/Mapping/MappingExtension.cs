@@ -8,9 +8,9 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using EntityFramework.BulkExtensions.BulkOperations;
 
-namespace EntityFramework.BulkExtensions.Metadata
+namespace EntityFramework.BulkExtensions.Mapping
 {
-    internal static class EntityMapping
+    internal static class MappingExtension
     {
         /// <summary>
         /// 
@@ -19,14 +19,14 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// <param name="context"></param>
         /// <param name="operation"></param>
         /// <returns></returns>
-        internal static EntityMetadata Metadata<TEntity>(this DbContext context, OperationType operation) where TEntity : class
+        internal static EntityMapping Mapping<TEntity>(this DbContext context, OperationType operation) where TEntity : class
         {
             var entityTypeMapping = context.GetEntityMapping<TEntity>();
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
             var entityType = typeof(TEntity);
 
-            var properties = entityTypeMapping.GetPropertyMetadata();
-            var entityMetadata = new EntityMetadata
+            var properties = entityTypeMapping.GetPropertyMapping();
+            var entityMapping = new EntityMapping
             {
                 TableName = mappings.GetTableName(),
                 Schema = mappings.GetTableSchema(),
@@ -40,12 +40,12 @@ namespace EntityFramework.BulkExtensions.Metadata
                     .Where(typeMapping => !typeMapping.IsHierarchyMapping)
                     .ToList();
 
-                entityMetadata.HierarchyMapping = GetHierarchyMappings(typeMappings);
+                entityMapping.HierarchyMapping = GetHierarchyMappings(typeMappings);
                 properties.Add(GetDiscriminatorProperty(typeMappings));
             }
 
-            entityMetadata.Properties = properties;
-            return entityMetadata;
+            entityMapping.Properties = properties;
+            return entityMapping;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// </summary>
         /// <param name="typeMappings"></param>
         /// <returns></returns>
-        private static PropertyMetadata GetDiscriminatorProperty(IEnumerable<EntityTypeMapping> typeMappings)
+        private static PropertyMapping GetDiscriminatorProperty(IEnumerable<EntityTypeMapping> typeMappings)
         {
             var discriminator = typeMappings
                 .SelectMany(
@@ -62,7 +62,7 @@ namespace EntityFramework.BulkExtensions.Metadata
                             fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
                 .First(conditionMapping => conditionMapping.Property == null);
 
-            return new PropertyMetadata
+            return new PropertyMapping
             {
                 ColumnName = discriminator.Column.Name,
                 DbType = discriminator.Column.TypeName,
@@ -98,21 +98,21 @@ namespace EntityFramework.BulkExtensions.Metadata
         /// </summary>
         /// <param name="entityTypeMapping"></param>
         /// <returns></returns>
-        private static IList<PropertyMetadata> GetPropertyMetadata(this IEnumerable<EntityTypeMapping> entityTypeMapping)
+        private static IList<PropertyMapping> GetPropertyMapping(this IEnumerable<EntityTypeMapping> entityTypeMapping)
         {
             var typeMappings = entityTypeMapping.ToList();
             var mapping = typeMappings.Select(typeMapping => typeMapping.Fragments.First());
             var scalarPropertyMappings = mapping
                 .SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
-                .Where(propertyMapping => propertyMapping.Column.StoreGeneratedPattern != StoreGeneratedPattern.Computed)
+                .Where(propertyMapping => !propertyMapping.Column.IsStoreGeneratedComputed)
                 .ToList();
 
-            var propertyMetadatas = new List<PropertyMetadata>();
+            var propertyMappings = new List<PropertyMapping>();
             scalarPropertyMappings.ForEach(propertyMapping =>
             {
-                if (propertyMetadatas.All(metadata => metadata.ColumnName != propertyMapping.Column.Name))
+                if (propertyMappings.All(map => map.ColumnName != propertyMapping.Column.Name))
                 {
-                    propertyMetadatas.Add(new PropertyMetadata
+                    propertyMappings.Add(new PropertyMapping
                     {
                         ColumnName = propertyMapping.Column.Name,
                         DbType = propertyMapping.Column.TypeName,
@@ -121,14 +121,13 @@ namespace EntityFramework.BulkExtensions.Metadata
                         MaxLength = propertyMapping.Column.MaxLength,
                         Type = propertyMapping.Property.UnderlyingPrimitiveType.ClrEquivalentType,
                         PropertyName = propertyMapping.Property.Name,
-                        IsPk = typeMappings
-                            .Where(typeMapping => !typeMapping.IsHierarchyMapping)
-                            .Any(typeMapping => typeMapping.EntityType.KeyProperties.Any(property => property.Name == propertyMapping.Property.Name))
+                        IsPk = ((EntityType)propertyMapping.Column.DeclaringType).KeyProperties
+                            .Any(property => property.Name.Equals(propertyMapping.Column.Name))
                     });
                 }
             });
 
-            return propertyMetadatas;
+            return propertyMappings;
         }
 
         /// <summary>

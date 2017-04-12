@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Helpers;
-using EntityFramework.BulkExtensions.Metadata;
+using EntityFramework.BulkExtensions.Mapping;
 using EntityFramework.BulkExtensions.Operations;
 
 namespace EntityFramework.BulkExtensions.BulkOperations
@@ -25,8 +25,8 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
         {
-            var metadata = context.Metadata<TEntity>(OperationType.Update);
-            var tmpTableName = metadata.RandomTableName();
+            var mapping = context.Mapping<TEntity>(OperationType.Update);
+            var tmpTableName = mapping.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
             var affectedRows = 0;
@@ -40,17 +40,17 @@ namespace EntityFramework.BulkExtensions.BulkOperations
             try
             {
                 //Cconvert entity collection into a DataTable
-                var dataTable = entityList.ToDataTable(metadata);
+                var dataTable = entityList.ToDataTable(mapping);
                 //Create temporary table.
-                var command = metadata.CreateTempTable(tmpTableName);
+                var command = mapping.CreateTempTable(tmpTableName);
                 database.ExecuteSqlCommand(command);
 
                 //Bulk inset data to temporary temporary table.
                 database.BulkInsertToTable(dataTable, tmpTableName, SqlBulkCopyOptions.Default);
 
                 //Copy data from temporary table to destination table.
-                command = $"MERGE INTO {metadata.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                          $"{metadata.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {metadata.BuildUpdateSet()}; " +
+                command = $"MERGE INTO {mapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
+                          $"{mapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {mapping.BuildUpdateSet()}; " +
                           SqlHelper.GetDropTableCommand(tmpTableName);
 
                 affectedRows = database.ExecuteSqlCommand(command);
