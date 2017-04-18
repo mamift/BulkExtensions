@@ -5,6 +5,8 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using EntityFramework.BulkExtensions.BulkOperations;
+using EntityFramework.BulkExtensions.Extensions;
 using EntityFramework.BulkExtensions.Mapping;
 
 namespace EntityFramework.BulkExtensions.Helpers
@@ -27,15 +29,14 @@ namespace EntityFramework.BulkExtensions.Helpers
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="mapping"></param>
         /// <param name="tableName"></param>
-        /// <param name="primaryKeysOnly"></param>
+        /// <param name="operationType"></param>
         /// <returns></returns>
-        internal static string CreateTempTable(this EntityMapping mapping, string tableName, bool primaryKeysOnly = false)
+        internal static string CreateTempTable(this EntityMapping mapping, string tableName, OperationType operationType)
         {
-            var columns = primaryKeysOnly ? mapping.Pks : mapping.Properties;
+            var columns = mapping.Properties.FilterProperties(operationType).ToList();
             var command = new StringBuilder();
 
             command.Append($"CREATE TABLE {tableName}(");

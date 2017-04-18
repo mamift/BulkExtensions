@@ -6,7 +6,6 @@ using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using EntityFramework.BulkExtensions.BulkOperations;
 
 namespace EntityFramework.BulkExtensions.Mapping
 {
@@ -17,9 +16,8 @@ namespace EntityFramework.BulkExtensions.Mapping
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
-        /// <param name="operation"></param>
         /// <returns></returns>
-        internal static EntityMapping Mapping<TEntity>(this DbContext context, OperationType operation) where TEntity : class
+        internal static EntityMapping Mapping<TEntity>(this DbContext context) where TEntity : class
         {
             var entityTypeMapping = context.GetEntityMapping<TEntity>();
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
@@ -34,7 +32,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 EntityType = entityType
             };
 
-            if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping) && operation == OperationType.Insert)
+            if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping))
             {
                 var typeMappings = entityTypeMapping
                     .Where(typeMapping => !typeMapping.IsHierarchyMapping)
@@ -94,7 +92,6 @@ namespace EntityFramework.BulkExtensions.Mapping
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="entityTypeMapping"></param>
         /// <returns></returns>
@@ -110,21 +107,21 @@ namespace EntityFramework.BulkExtensions.Mapping
             var propertyMappings = new List<PropertyMapping>();
             scalarPropertyMappings.ForEach(propertyMapping =>
             {
-                if (propertyMappings.All(map => map.ColumnName != propertyMapping.Column.Name))
+                if (propertyMappings.Any(map => map.ColumnName == propertyMapping.Column.Name)) return;
+
+                propertyMappings.Add(new PropertyMapping
                 {
-                    propertyMappings.Add(new PropertyMapping
-                    {
-                        ColumnName = propertyMapping.Column.Name,
-                        DbType = propertyMapping.Column.TypeName,
-                        Precision = propertyMapping.Column.Precision,
-                        Scale = propertyMapping.Column.Scale,
-                        MaxLength = propertyMapping.Column.MaxLength,
-                        Type = propertyMapping.Property.UnderlyingPrimitiveType.ClrEquivalentType,
-                        PropertyName = propertyMapping.Property.Name,
-                        IsPk = ((EntityType)propertyMapping.Column.DeclaringType).KeyProperties
-                            .Any(property => property.Name.Equals(propertyMapping.Column.Name))
-                    });
-                }
+                    ColumnName = propertyMapping.Column.Name,
+                    DbType = propertyMapping.Column.TypeName,
+                    Precision = propertyMapping.Column.Precision,
+                    Scale = propertyMapping.Column.Scale,
+                    MaxLength = propertyMapping.Column.MaxLength,
+                    Type = propertyMapping.Property.UnderlyingPrimitiveType.ClrEquivalentType,
+                    PropertyName = propertyMapping.Property.Name,
+                    IsPk = ((EntityType) propertyMapping.Column.DeclaringType).KeyProperties
+                        .Any(property => property.Name.Equals(propertyMapping.Column.Name))
+                });
+
             });
 
             return propertyMappings;
@@ -163,8 +160,8 @@ namespace EntityFramework.BulkExtensions.Mapping
             var metadata = context.ObjectContext.MetadataWorkspace;
             var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
             var entityType = metadata
-                    .GetItems<EntityType>(DataSpace.OSpace)
-                    .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
+                .GetItems<EntityType>(DataSpace.OSpace)
+                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
             if (entityType == null)
                 throw new EntityException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
@@ -175,9 +172,9 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .Single(s => s.ElementType.Name == entityType.Name);
 
             var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
-                    .Single()
-                    .EntitySetMappings
-                    .Single(s => s.EntitySet == entitySet);
+                .Single()
+                .EntitySetMappings
+                .Single(s => s.EntitySet == entitySet);
 
             return mapping.EntityTypeMappings;
         }

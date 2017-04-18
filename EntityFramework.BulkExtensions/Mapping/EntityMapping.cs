@@ -17,10 +17,7 @@ namespace EntityFramework.BulkExtensions.Mapping
             get { return Properties.Where(propertyMapping => propertyMapping.IsPk); }
         }
 
-        public string FullTableName
-        {
-            get { return $"[{Schema}].[{TableName}]"; }
-        }
+        public string FullTableName => $"[{Schema}].[{TableName}]";
 
         public Dictionary<string, string> HierarchyMapping { get; set; }
     }

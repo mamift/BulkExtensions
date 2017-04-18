@@ -51,6 +51,7 @@
     <Compile Include="BulkOperations\IBulkOperation.cs" />
     <Compile Include="BulkOperations\OperationFactory.cs" />
     <Compile Include="Extensions\DataTableExtension.cs" />
+    <Compile Include="Extensions\PropertiesExtention.cs" />
     <Compile Include="Helpers\GuidHelper.cs" />
     <Compile Include="Mapping\MappingExtension.cs" />
     <Compile Include="Mapping\EntityMapping.cs" />

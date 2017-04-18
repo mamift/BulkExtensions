@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using EntityFramework.BulkExtensions.BulkOperations;
 using EntityFramework.BulkExtensions.Mapping;
 
 namespace EntityFramework.BulkExtensions.Extensions
@@ -10,17 +11,17 @@ namespace EntityFramework.BulkExtensions.Extensions
     internal static class DataTableExtension
     {
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="mapping"></param>
         /// <param name="entities"></param>
-        /// <param name="primaryKeysOnly"></param>
+        /// <param name="operationType"></param>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, EntityMapping mapping, bool primaryKeysOnly = false) where TEntity : class
+        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, EntityMapping mapping, OperationType operationType) where TEntity : class
         {
-            var tb = CreateDataTable(mapping, primaryKeysOnly);
-            var tableColumns = primaryKeysOnly ? mapping.Pks.ToList() : mapping.Properties.ToList();
+            var tableColumns = mapping.Properties.FilterProperties(operationType).ToList();
+
+            var tb = CreateDataTable(mapping, tableColumns);
 
             foreach (var item in entities)
             {
@@ -43,11 +44,10 @@ namespace EntityFramework.BulkExtensions.Extensions
             return tb;
         }
 
-        private static DataTable CreateDataTable(EntityMapping mapping, bool primaryKeysOnly = false)
+        private static DataTable CreateDataTable(EntityMapping mapping, IEnumerable<PropertyMapping> propertyMappings)
         {
             var table = new DataTable();
-            var columns = primaryKeysOnly ? mapping.Pks : mapping.Properties;
-            foreach (var prop in columns)
+            foreach (var prop in propertyMappings)
             {
                 table.Columns.Add(prop.ColumnName, Nullable.GetUnderlyingType(prop.Type) ?? prop.Type);
             }

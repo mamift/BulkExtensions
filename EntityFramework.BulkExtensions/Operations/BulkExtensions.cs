@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using EntityFramework.BulkExtensions.BulkOperations;
 
@@ -11,12 +12,12 @@ namespace EntityFramework.BulkExtensions.Operations
         /// </summary>
         /// <param name="context">The EntityFramework DbContext object.</param>
         /// <param name="entities">The collection of objects to be inserted.</param>
-        /// <param name="identity"></param>
+        /// <param name="options"></param>
         /// <typeparam name="TEntity">The type of the objects collection. TEntity must be a class.</typeparam>
         /// <returns>The number of affected rows.</returns>
-        public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, Identity identity = Identity.InputOnly) where TEntity : class
+        public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, Options options = Options.Default) where TEntity : class
         {
-            return OperationFactory.BulkInsert.CommitTransaction(context, entities, identity);
+            return OperationFactory.BulkInsert.CommitTransaction(context, entities, options);
         }
 
         /// <summary>
@@ -44,8 +45,10 @@ namespace EntityFramework.BulkExtensions.Operations
         }
     }
 
-    public enum Identity
+    [Flags]
+    public enum Options
     {
-        InputOnly, Output
+        Default = 1,
+        OutputIdentity = 2
     }
 }

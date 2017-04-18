@@ -20,12 +20,12 @@ namespace EntityFramework.BulkExtensions.BulkOperations
         /// </summary>
         /// <param name="context"></param>
         /// <param name="collection"></param>
-        /// <param name="identity"></param>
+        /// <param name="options"></param>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Identity identity)
+        int IBulkOperation.CommitTransaction<TEntity>(DbContext context, IEnumerable<TEntity> collection, Options options)
         {
-            var mapping = context.Mapping<TEntity>(OperationType.Update);
+            var mapping = context.Mapping<TEntity>();
             var tmpTableName = mapping.RandomTableName();
             var entityList = collection.ToList();
             var database = context.Database;
@@ -40,9 +40,9 @@ namespace EntityFramework.BulkExtensions.BulkOperations
             try
             {
                 //Cconvert entity collection into a DataTable
-                var dataTable = entityList.ToDataTable(mapping);
+                var dataTable = entityList.ToDataTable(mapping, OperationType.Update);
                 //Create temporary table.
-                var command = mapping.CreateTempTable(tmpTableName);
+                var command = mapping.CreateTempTable(tmpTableName, OperationType.Update);
                 database.ExecuteSqlCommand(command);
 
                 //Bulk inset data to temporary temporary table.
