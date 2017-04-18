@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 using EntityFramework.BulkExtensions.BulkOperations;
 
@@ -43,12 +42,5 @@ namespace EntityFramework.BulkExtensions.Operations
         {
             return OperationFactory.BulkDelete.CommitTransaction(context, entities);
         }
-    }
-
-    [Flags]
-    public enum Options
-    {
-        Default = 1,
-        OutputIdentity = 2
     }
 }

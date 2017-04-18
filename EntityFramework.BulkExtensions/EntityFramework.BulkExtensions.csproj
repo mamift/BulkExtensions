@@ -59,6 +59,7 @@
     <Compile Include="Operations\BulkExtensions.cs" />
     <Compile Include="Extensions\ContextExtension.cs" />
     <Compile Include="Helpers\SqlHelper.cs" />
+    <Compile Include="Operations\Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

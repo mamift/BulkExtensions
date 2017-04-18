@@ -97,7 +97,7 @@ namespace EntityFramework.BulkExtensions.Helpers
 
             command.Append("SET ");
 
-            foreach (var column in mapping.Properties)
+            foreach (var column in mapping.Properties.Where(propertyMapping => !propertyMapping.IsHierarchyMapping))
             {
                 if (column.IsPk) continue;
 
@@ -116,13 +116,15 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <returns></returns>
         internal static string PrimaryKeysComparator(this EntityMapping mapping)
         {
-            var updateOn = mapping.Pks.ToList();
+            var keys = mapping.Pks.ToList();
             var command = new StringBuilder();
+            var firstKey = keys.First();
 
-            command.Append($"ON [{Target}].[{updateOn.First().ColumnName}] = [{Source}].[{updateOn.First().ColumnName}] ");
+            command.Append($"ON [{Target}].[{firstKey.ColumnName}] = [{Source}].[{firstKey.ColumnName}] ");
+            keys.Remove(firstKey);
 
-            if (updateOn.Count > 1)
-                foreach (var key in updateOn.Skip(1))
+            if (keys.Any())
+                foreach (var key in keys)
                     command.Append($"AND [{Target}].[{key.ColumnName}] = [{Source}].[{key.ColumnName}]");
 
             return command.ToString();
@@ -164,20 +166,18 @@ namespace EntityFramework.BulkExtensions.Helpers
             PropertyMapping propertyMapping, IList<TEntity> items)
         {
             var command = $"SELECT {propertyMapping.ColumnName} FROM {tmpOutputTableName} ORDER BY {propertyMapping.ColumnName};";
-            var identities = context.SqlQuery<int>(command);
-            var counter = 0;
+            var identities = context.SqlQuery<int>(command).ToList();
 
             foreach (var result in identities)
             {
-                var property = items[counter].GetType().GetProperty(propertyMapping.PropertyName);
+                var index = identities.IndexOf(result);
+                var property = items[index].GetType().GetProperty(propertyMapping.PropertyName);
 
-                if (property.CanWrite)
-                    property.SetValue(items[counter], result, null);
+                if (property != null && property.CanWrite)
+                    property.SetValue(items[index], result, null);
 
                 else
                     throw new Exception();
-
-                counter++;
             }
 
             command = GetDropTableCommand(tmpOutputTableName);

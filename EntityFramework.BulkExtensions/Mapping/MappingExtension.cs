@@ -22,8 +22,8 @@ namespace EntityFramework.BulkExtensions.Mapping
             var entityTypeMapping = context.GetEntityMapping<TEntity>();
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
             var entityType = typeof(TEntity);
-
             var properties = entityTypeMapping.GetPropertyMapping();
+
             var entityMapping = new EntityMapping
             {
                 TableName = mappings.GetTableName(),

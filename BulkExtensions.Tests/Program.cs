@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
+using System.Linq;
 using System.Threading;
 using BulkExtensions.Tests.Database;
 using BulkExtensions.Tests.Model;
@@ -39,9 +41,8 @@ namespace BulkExtensions.Tests
                         }
                     };
 
-                    db.BulkInsert(people, Identity.Output);
+                    db.BulkInsert(people, Options.OutputIdentity);
                     Console.WriteLine("People added successfully!");
-                    Thread.Sleep(2000);
 
                     foreach (var person in people)
                     {
@@ -50,14 +51,22 @@ namespace BulkExtensions.Tests
 
                     db.BulkUpdate(people);
                     Console.WriteLine("People updated successfully!");
-                    Thread.Sleep(2000);
+                    using (var db2 = new TestDatabase())
+                    {
+                        var person = db2.Persons.Single(p => p.Id == 1);
+                        person.Name = "context2";
+                        db2.SaveChanges();
+                    }
                 }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine(ex);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
-            }            
+            }
         }
     }
 }
