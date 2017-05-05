@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions.BulkOperations;
-using EntityFramework.BulkExtensions.Mapping;
+using EntityFramework.MappingExtension;
 
 namespace EntityFramework.BulkExtensions.Extensions
 {
     internal static class PropertiesExtention
     {
-        internal static IEnumerable<PropertyMapping> FilterProperties(this IEnumerable<PropertyMapping> propertyMappings, OperationType operationType)
+        internal static IEnumerable<IPropertyMapping> FilterProperties(this IEnumerable<IPropertyMapping> IPropertyMappings, OperationType operationType)
         {
             switch (operationType)
             {
                 case OperationType.Delete:
-                    return propertyMappings.Where(propertyMapping => propertyMapping.IsPk).ToList();
+                    return IPropertyMappings.Where(IPropertyMapping => IPropertyMapping.IsPk).ToList();
                 case OperationType.Update:
-                    return propertyMappings.Where(propertyMapping => !propertyMapping.IsHierarchyMapping).ToList();
+                    return IPropertyMappings.Where(IPropertyMapping => !IPropertyMapping.IsHierarchyMapping).ToList();
                 default:
-                    return propertyMappings;
+                    return IPropertyMappings;
             }
         }
     }

@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityFramework.BulkExtensions.Mapping
+namespace EntityFramework.MappingExtension
 {
-    internal class EntityMapping
+    public class EntityMapping : IEntityMapping
     {
         public Type EntityType { get; set; }
         public string EntityName { get; set; }
         public string TableName { get; set; }
         public string Schema { get; set; }
-        public IEnumerable<PropertyMapping> Properties { get; set; }
+        public IEnumerable<IPropertyMapping> Properties { get; set; }
 
-        public IEnumerable<PropertyMapping> Pks
+        public IEnumerable<IPropertyMapping> Pks
         {
             get { return Properties.Where(propertyMapping => propertyMapping.IsPk); }
         }

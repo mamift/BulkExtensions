@@ -1,12 +1,8 @@
 ﻿using System.Data.Entity;
 
-namespace BulkExtensions.Tests.Database
+namespace EntityFramework.BulkExtensions.UnitTests.Database
 {
     public class TestDatabaseInitializer : DropCreateDatabaseAlways<TestDatabase>
     {
-        public TestDatabaseInitializer()
-        {
-            
-        }
     }
 }

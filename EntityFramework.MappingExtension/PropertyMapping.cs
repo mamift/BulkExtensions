@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace EntityFramework.BulkExtensions.Mapping
+namespace EntityFramework.MappingExtension
 {
-    internal class PropertyMapping
+    public class PropertyMapping : IPropertyMapping
     {
         public Type Type { get; set; }
         public string DbType { get; set; }

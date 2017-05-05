@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using EntityFramework.BulkExtensions.BulkOperations;
 using EntityFramework.BulkExtensions.Extensions;
-using EntityFramework.BulkExtensions.Mapping;
+using EntityFramework.MappingExtension;
 
 namespace EntityFramework.BulkExtensions.Helpers
 {
@@ -23,7 +23,7 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string RandomTableName(this EntityMapping mapping)
+        internal static string RandomTableName(this IEntityMapping mapping)
         {
             return $"[{mapping.Schema}].[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
@@ -34,7 +34,7 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <param name="tableName"></param>
         /// <param name="operationType"></param>
         /// <returns></returns>
-        internal static string CreateTempTable(this EntityMapping mapping, string tableName, OperationType operationType)
+        internal static string CreateTempTable(this IEntityMapping mapping, string tableName, OperationType operationType)
         {
             var columns = mapping.Properties.FilterProperties(operationType).ToList();
             var command = new StringBuilder();
@@ -90,14 +90,14 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string BuildUpdateSet(this EntityMapping mapping)
+        internal static string BuildUpdateSet(this IEntityMapping mapping)
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
 
             command.Append("SET ");
 
-            foreach (var column in mapping.Properties.Where(propertyMapping => !propertyMapping.IsHierarchyMapping))
+            foreach (var column in mapping.Properties.Where(IPropertyMapping => !IPropertyMapping.IsHierarchyMapping))
             {
                 if (column.IsPk) continue;
 
@@ -114,7 +114,7 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <returns></returns>
-        internal static string PrimaryKeysComparator(this EntityMapping mapping)
+        internal static string PrimaryKeysComparator(this IEntityMapping mapping)
         {
             var keys = mapping.Pks.ToList();
             var command = new StringBuilder();
@@ -138,10 +138,10 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <param name="tmpTableName"></param>
         /// <param name="identityColumn"></param>
         /// <returns></returns>
-        internal static string GetInsertIntoStagingTableCmd(this EntityMapping mapping, string tmpOutputTableName,
+        internal static string GetInsertIntoStagingTableCmd(this IEntityMapping mapping, string tmpOutputTableName,
             string tmpTableName, string identityColumn)
         {
-            var columns = mapping.Properties.Select(propertyMapping => propertyMapping.ColumnName).ToList();
+            var columns = mapping.Properties.Select(IPropertyMapping => IPropertyMapping.ColumnName).ToList();
 
             var comm = GetOutputCreateTableCmd(tmpOutputTableName, identityColumn)
                        + BuildInsertIntoSet(columns, identityColumn, mapping.FullTableName)
@@ -160,18 +160,18 @@ namespace EntityFramework.BulkExtensions.Helpers
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="tmpOutputTableName"></param>
-        /// <param name="propertyMapping"></param>
+        /// <param name="IPropertyMapping"></param>
         /// <param name="items"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this Database context, string tmpOutputTableName,
-            PropertyMapping propertyMapping, IList<TEntity> items)
+            IPropertyMapping IPropertyMapping, IList<TEntity> items)
         {
-            var command = $"SELECT {propertyMapping.ColumnName} FROM {tmpOutputTableName} ORDER BY {propertyMapping.ColumnName};";
+            var command = $"SELECT {IPropertyMapping.ColumnName} FROM {tmpOutputTableName} ORDER BY {IPropertyMapping.ColumnName};";
             var identities = context.SqlQuery<int>(command).ToList();
 
             foreach (var result in identities)
             {
                 var index = identities.IndexOf(result);
-                var property = items[index].GetType().GetProperty(propertyMapping.PropertyName);
+                var property = items[index].GetType().GetProperty(IPropertyMapping.PropertyName);
 
                 if (property != null && property.CanWrite)
                     property.SetValue(items[index], result, null);
@@ -226,7 +226,7 @@ namespace EntityFramework.BulkExtensions.Helpers
             return $"CREATE TABLE {tmpTablename}([{identityColumn}] int); ";
         }
 
-        private static string GetSchemaType(this PropertyMapping column, string columnType)
+        private static string GetSchemaType(this IPropertyMapping column, string columnType)
         {
             switch (columnType)
             {

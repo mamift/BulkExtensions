@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using EntityFramework.BulkExtensions.BulkOperations;
-using EntityFramework.BulkExtensions.Mapping;
+using EntityFramework.MappingExtension;
 
 namespace EntityFramework.BulkExtensions.Extensions
 {
@@ -17,7 +17,7 @@ namespace EntityFramework.BulkExtensions.Extensions
         /// <param name="operationType"></param>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, EntityMapping mapping, OperationType operationType) where TEntity : class
+        internal static DataTable ToDataTable<TEntity>(this IEnumerable<TEntity> entities, IEntityMapping mapping, OperationType operationType) where TEntity : class
         {
             var tableColumns = mapping.Properties.FilterProperties(operationType).ToList();
 
@@ -44,10 +44,10 @@ namespace EntityFramework.BulkExtensions.Extensions
             return tb;
         }
 
-        private static DataTable CreateDataTable(EntityMapping mapping, IEnumerable<PropertyMapping> propertyMappings)
+        private static DataTable CreateDataTable(IEntityMapping mapping, IEnumerable<IPropertyMapping> IPropertyMappings)
         {
             var table = new DataTable();
-            foreach (var prop in propertyMappings)
+            foreach (var prop in IPropertyMappings)
             {
                 table.Columns.Add(prop.ColumnName, Nullable.GetUnderlyingType(prop.Type) ?? prop.Type);
             }

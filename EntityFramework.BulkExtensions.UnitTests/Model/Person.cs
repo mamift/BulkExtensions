@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BulkExtensions.Tests.Model
+namespace EntityFramework.BulkExtensions.UnitTests.Model
 {
     public class Person
     {

@@ -1,4 +1,4 @@
-﻿namespace BulkExtensions.Tests.Model
+﻿namespace EntityFramework.BulkExtensions.UnitTests.Model
 {
     public class Employee : Person
     {

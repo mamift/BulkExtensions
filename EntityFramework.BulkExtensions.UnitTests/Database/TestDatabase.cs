@@ -1,8 +1,8 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using BulkExtensions.Tests.Model;
+using EntityFramework.BulkExtensions.UnitTests.Model;
 
-namespace BulkExtensions.Tests.Database
+namespace EntityFramework.BulkExtensions.UnitTests.Database
 {
     public class TestDatabase : DbContext
     {
