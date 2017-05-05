@@ -1,4 +1,4 @@
-# EntityFramework.BulkExtensions
+# BulkExtensions
 
    This project was built as an extension to add bulk operations functionality to the Entity Framework. 
 It works as extension methods of the DBContext class and is very simple to use. If the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
