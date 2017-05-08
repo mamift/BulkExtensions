@@ -6,7 +6,8 @@ using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using EntityFramework.MappingExtension;
+using EntityFramework.BulkExtensions.Commons.Mapping;
+using PropertyMapping = EntityFramework.BulkExtensions.Commons.Mapping.PropertyMapping;
 
 namespace EntityFramework.BulkExtensions.Mapping
 {
@@ -61,7 +62,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                             fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
                 .First(conditionMapping => conditionMapping.Property == null);
 
-            return new EntityFramework.MappingExtension.PropertyMapping
+            return new PropertyMapping
             {
                 ColumnName = discriminator.Column.Name,
                 DbType = discriminator.Column.TypeName,
@@ -106,21 +107,21 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .ToList();
 
             var propertyMappings = new List<IPropertyMapping>();
-            scalarIPropertyMappings.ForEach(IPropertyMapping =>
+            scalarIPropertyMappings.ForEach(propertyMapping =>
             {
-                if (propertyMappings.Any(map => map.ColumnName == IPropertyMapping.Column.Name)) return;
+                if (propertyMappings.Any(map => map.ColumnName == propertyMapping.Column.Name)) return;
 
-                propertyMappings.Add(new EntityFramework.MappingExtension.PropertyMapping
+                propertyMappings.Add(new PropertyMapping
                 {
-                    ColumnName = IPropertyMapping.Column.Name,
-                    DbType = IPropertyMapping.Column.TypeName,
-                    Precision = IPropertyMapping.Column.Precision,
-                    Scale = IPropertyMapping.Column.Scale,
-                    MaxLength = IPropertyMapping.Column.MaxLength,
-                    Type = IPropertyMapping.Property.UnderlyingPrimitiveType.ClrEquivalentType,
-                    PropertyName = IPropertyMapping.Property.Name,
-                    IsPk = ((EntityType) IPropertyMapping.Column.DeclaringType).KeyProperties
-                        .Any(property => property.Name.Equals(IPropertyMapping.Column.Name))
+                    ColumnName = propertyMapping.Column.Name,
+                    DbType = propertyMapping.Column.TypeName,
+                    Precision = propertyMapping.Column.Precision,
+                    Scale = propertyMapping.Column.Scale,
+                    MaxLength = propertyMapping.Column.MaxLength,
+                    Type = propertyMapping.Property.UnderlyingPrimitiveType.ClrEquivalentType,
+                    PropertyName = propertyMapping.Property.Name,
+                    IsPk = ((EntityType) propertyMapping.Column.DeclaringType).KeyProperties
+                        .Any(property => property.Name.Equals(propertyMapping.Column.Name))
                 });
 
             });

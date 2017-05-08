@@ -1,14 +1,15 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EntityFramework.MappingExtension")]
+[assembly: AssemblyTitle("EntityFrameworkCore.BulkExtensions")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EntityFramework.MappingExtension")]
+[assembly: AssemblyProduct("EntityFrameworkCore.BulkExtensions")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f7622767-7260-4107-8935-e3739edd8c8b")]
+[assembly: Guid("C61BC16E-C135-42F3-A9C3-6256E54ADC2A")]
 
 // Version information for an assembly consists of the following four values:
 //

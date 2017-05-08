@@ -9,9 +9,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EntityFramework.BulkExtensions</RootNamespace>
     <AssemblyName>EntityFramework.BulkExtensions</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,46 +39,22 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.1.3.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Interactive.Async, Version=3.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Interactive.Async.3.0.0\lib\net45\System.Interactive.Async.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BulkOperations\BulkDelete.cs" />
-    <Compile Include="BulkOperations\BulkInsert.cs" />
-    <Compile Include="BulkOperations\BulkUpdate.cs" />
-    <Compile Include="BulkOperations\IBulkOperation.cs" />
-    <Compile Include="BulkOperations\OperationFactory.cs" />
-    <Compile Include="Extensions\DataTableExtension.cs" />
-    <Compile Include="Extensions\PropertiesExtention.cs" />
-    <Compile Include="Helpers\GuidHelper.cs" />
+    <Compile Include="BulkExtensions.cs" />
+    <Compile Include="Extensions\DbContextExtension.cs" />
     <Compile Include="Mapping\MappingExtension.cs" />
-    <Compile Include="Operations\BulkExtensions.cs" />
-    <Compile Include="Extensions\ContextExtension.cs" />
-    <Compile Include="Helpers\SqlHelper.cs" />
-    <Compile Include="Operations\Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EntityFramework.MappingExtension\EntityFramework.MappingExtension.csproj">
-      <Project>{f7622767-7260-4107-8935-e3739edd8c8b}</Project>
-      <Name>EntityFramework.MappingExtension</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\Shared\Shared.projitems" Label="Shared" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

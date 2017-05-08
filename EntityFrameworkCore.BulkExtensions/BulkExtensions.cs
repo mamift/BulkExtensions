@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Data.Entity;
-using EntityFramework.BulkExtensions.BulkOperations;
+using EntityFramework.BulkExtensions.Commons.BulkOperations;
+using EntityFramework.BulkExtensions.Commons.Helpers;
+using EntityFrameworkCore.BulkExtensions.Extensions;
+using EntityFrameworkCore.BulkExtensions.Mapping;
+using Microsoft.EntityFrameworkCore;
 
-namespace EntityFramework.BulkExtensions.Operations
+namespace EntityFrameworkCore.BulkExtensions
 {
     public static class BulkExtensions
     {
@@ -16,7 +19,7 @@ namespace EntityFramework.BulkExtensions.Operations
         /// <returns>The number of affected rows.</returns>
         public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, Options options = Options.Default) where TEntity : class
         {
-            return OperationFactory.BulkInsert.CommitTransaction(context, entities, options);
+            return OperationFactory.BulkInsert.CommitTransaction(context.GetContextWrapper<TEntity>(), entities, options);
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace EntityFramework.BulkExtensions.Operations
         /// <returns>The number of affected rows.</returns>
         public static int BulkUpdate<TEntity>(this DbContext context, IEnumerable<TEntity> entities) where TEntity : class
         {
-            return OperationFactory.BulkUpdate.CommitTransaction(context, entities);
+            return OperationFactory.BulkUpdate.CommitTransaction(context.GetContextWrapper<TEntity>(), entities);
         }
 
         /// <summary>
@@ -40,7 +43,7 @@ namespace EntityFramework.BulkExtensions.Operations
         /// <returns>The number of affected rows.</returns>
         public static int BulkDelete<TEntity>(this DbContext context, IEnumerable<TEntity> entities) where TEntity : class
         {
-            return OperationFactory.BulkDelete.CommitTransaction(context, entities);
+            return OperationFactory.BulkDelete.CommitTransaction(context.GetContextWrapper<TEntity>(), entities);
         }
     }
 }
