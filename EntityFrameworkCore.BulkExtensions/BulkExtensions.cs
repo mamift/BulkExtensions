@@ -2,7 +2,6 @@
 using EntityFramework.BulkExtensions.Commons.BulkOperations;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFrameworkCore.BulkExtensions.Extensions;
-using EntityFrameworkCore.BulkExtensions.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFrameworkCore.BulkExtensions

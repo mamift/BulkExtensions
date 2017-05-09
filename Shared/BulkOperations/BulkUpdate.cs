@@ -24,30 +24,23 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
         {
             var tmpTableName = context.EntityMapping.RandomTableName();
             var entityList = collection.ToList();
-            var affectedRows = 0;
             if (!entityList.Any())
             {
-                return affectedRows;
+                return entityList.Count;
             }
 
             try
             {
                 //Create temporary table.
-                var command = context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Update);
-                context.ExecuteSqlCommand(command);
+                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Update));                
 
                 //Bulk inset data to temporary temporary table.
                 context.BulkInsertToTable(entityList, tmpTableName, OperationType.Update);
 
                 //Copy data from temporary table to destination table.
-                command = $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                          $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildUpdateSet()}; " +
-                          SqlHelper.GetDropTableCommand(tmpTableName);
-
-                affectedRows = context.ExecuteSqlCommand(command);
+                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName));
 
                 //Commit if internal transaction exists.
-                //context.UpdateEntityState(entityList);
                 context.Commit();
                 return affectedRows;
             }
@@ -57,6 +50,6 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 context.Rollback();
                 throw;
             }
-        }
+        }        
     }
 }

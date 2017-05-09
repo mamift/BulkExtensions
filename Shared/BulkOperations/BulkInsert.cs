@@ -33,8 +33,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 {
                     var tmpTableName = context.EntityMapping.RandomTableName();
                     //Create temporary table.
-                    var command = context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Insert);
-                    context.ExecuteSqlCommand(command);
+                    context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Insert));
 
                     //Bulk inset data to temporary temporary table.
                     context.BulkInsertToTable(entityList, tmpTableName, OperationType.Insert);
@@ -47,7 +46,6 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 
                     //Load generated IDs from temporary output table into the entities.
                     context.LoadFromTmpOutputTable(tmpOutputTableName, context.EntityMapping.Pks.First(), entityList);
-                    //context.UpdateEntityState(entityList);
                 }
                 else
                 {

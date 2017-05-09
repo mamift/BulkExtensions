@@ -25,27 +25,21 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
         {
             var tmpTableName = context.EntityMapping.RandomTableName();
             var entityList = collection.ToList();
-            var affectedRows = 0;
             if (!entityList.Any())
             {
-                return affectedRows;
+                return entityList.Count;
             }
 
             try
             {
                 //Create temporary table with only the primary keys.
-                var command = context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Delete);
-                context.ExecuteSqlCommand(command);
+                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Delete));
 
-                //Bulk inset data to temporary temporary table.
+                //Bulk inset data to temporary table.
                 context.BulkInsertToTable(entityList, tmpTableName, OperationType.Delete);
 
                 //Merge delete items from the target table that matches ids from the temporary table.
-                command = $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                    $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
-                    SqlHelper.GetDropTableCommand(tmpTableName);
-
-                affectedRows = context.ExecuteSqlCommand(command);
+                var affectedRows = context.ExecuteSqlCommand(context.BuildDeleteCommand(tmpTableName));
 
                 //Commit if internal transaction exists.
                 context.Commit();

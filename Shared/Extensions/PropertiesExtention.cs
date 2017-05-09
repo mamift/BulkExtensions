@@ -12,6 +12,8 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         {
             switch (operationType)
             {
+                case OperationType.Insert:
+                    return propertyMappings.Where(propertyMapping => !propertyMapping.IsPk).ToList();
                 case OperationType.Delete:
                     return propertyMappings.Where(propertyMapping => propertyMapping.IsPk).ToList();
                 case OperationType.Update:

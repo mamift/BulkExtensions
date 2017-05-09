@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace EntityFramework.BulkExtensions.Commons.Mapping
@@ -8,6 +9,9 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
         internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping)
         {
             Connection = connection;
+            if (Connection.State != ConnectionState.Open)
+                Connection.Open();
+
             IsInternalTransaction = transaction == null;
             Transaction = transaction ?? connection.BeginTransaction();
             EntityMapping = entityMapping;
@@ -23,6 +27,7 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
             sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandText = command;
 
             return sqlCommand.ExecuteNonQuery();
         }
@@ -33,12 +38,15 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
             sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandText = command;
 
             using (var reader = sqlCommand.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    list.Add((T) reader.GetValue(0));
+                    if (reader.FieldCount > 1)
+                        throw new Exception("The select command must have one column only");
+                    list.Add((T)reader.GetValue(0));
                 }
             }
 

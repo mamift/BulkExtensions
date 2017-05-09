@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -14,15 +14,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkUpdate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\IBulkOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\OperationFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Context\DbContextWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Context\IDbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkInsertExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\DataTableExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\DataReaderExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\PropertiesExtention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\EnumerableDataReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\GuidHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\Options.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\SqlHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Mapping\DbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\EntityMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Mapping\IDbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IEntityMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IPropertyMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\PropertyMapping.cs" />
@@ -30,7 +31,6 @@
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)BulkOperations\" />
     <Folder Include="$(MSBuildThisFileDirectory)Extensions\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
     <Folder Include="$(MSBuildThisFileDirectory)Mapping\" />
   </ItemGroup>
 </Project>

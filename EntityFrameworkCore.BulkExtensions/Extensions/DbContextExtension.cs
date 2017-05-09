@@ -14,7 +14,7 @@ namespace EntityFrameworkCore.BulkExtensions.Extensions
             var contextTransactionManager = context.GetInfrastructure().GetService<IDbContextTransactionManager>();
             var relationalConnection = (IRelationalConnection) contextTransactionManager;
             var connection = relationalConnection.DbConnection;
-            var transaction = relationalConnection.CurrentTransaction.GetDbTransaction();
+            var transaction = relationalConnection.CurrentTransaction?.GetDbTransaction();
 
             return new DbContextWrapper(connection, transaction, context.Mapping<TEntity>());
         }

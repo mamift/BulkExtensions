@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Mapping;
@@ -20,7 +19,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <returns></returns>
         internal static string RandomTableName(this IEntityMapping mapping)
         {
-            return $"[{mapping.Schema}].[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
+            return $"[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
 
         /// <summary>
@@ -32,73 +31,26 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         internal static string CreateTempTable(this IEntityMapping mapping, string tableName, OperationType operationType)
         {
             var columns = mapping.Properties.FilterProperties(operationType).ToList();
-            var command = new StringBuilder();
 
-            command.Append($"CREATE TABLE {tableName}(");
-
-            var paramList = columns
-                .Select(column => $"[{column.ColumnName}] {column.GetSchemaType(column.DbType)}")
+            var paramList = columns.Select(column => $"[{column.ColumnName}]")
                 .ToList();
             var paramListConcatenated = string.Join(", ", paramList);
 
-            command.Append(paramListConcatenated);
-            command.Append(");");
-
-            return command.ToString();
+            return $"SELECT {paramListConcatenated} INTO {tableName} FROM {mapping.TableName} WHERE 1 = 2";
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns></returns>
-        internal static string GetDropTableCommand(string tableName)
+        internal static string BuildDeleteCommand(this IDbContextWrapper context, string tmpTableName)
         {
-            return $"DROP TABLE {tableName};";
+            return $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
+                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
+                   GetDropTableCommand(tmpTableName);
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="mapping"></param>
-        /// <returns></returns>
-        internal static string BuildUpdateSet(this IEntityMapping mapping)
+        internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName)
         {
-            var command = new StringBuilder();
-            var parameters = new List<string>();
-
-            command.Append("SET ");
-
-            foreach (var column in mapping.Properties.Where(propertyMapping => !propertyMapping.IsHierarchyMapping))
-            {
-                if (column.IsPk) continue;
-
-                parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
-            }
-
-            command.Append(string.Join(", ", parameters) + " ");
-
-            return command.ToString();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mapping"></param>
-        /// <returns></returns>
-        internal static string PrimaryKeysComparator(this IEntityMapping mapping)
-        {
-            var keys = mapping.Pks.ToList();
-            var command = new StringBuilder();
-            var firstKey = keys.First();
-
-            command.Append($"ON [{Target}].[{firstKey.ColumnName}] = [{Source}].[{firstKey.ColumnName}] ");
-            keys.Remove(firstKey);
-
-            if (keys.Any())
-                foreach (var key in keys)
-                    command.Append($"AND [{Target}].[{key.ColumnName}] = [{Source}].[{key.ColumnName}]");
-
-            return command.ToString();
+            return $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
+                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildUpdateSet()}; " +
+                   GetDropTableCommand(tmpTableName);
         }
 
         /// <summary>
@@ -155,6 +107,60 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             context.ExecuteSqlCommand(command);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        private static string GetDropTableCommand(string tableName)
+        {
+            return $"DROP TABLE {tableName};";
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="mapping"></param>
+        /// <returns></returns>
+        private static string BuildUpdateSet(this IEntityMapping mapping)
+        {
+            var command = new StringBuilder();
+            var parameters = new List<string>();
+
+            command.Append("SET ");
+
+            foreach (var column in mapping.Properties.Where(propertyMapping => !propertyMapping.IsHierarchyMapping))
+            {
+                if (column.IsPk) continue;
+
+                parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
+            }
+
+            command.Append(string.Join(", ", parameters) + " ");
+
+            return command.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mapping"></param>
+        /// <returns></returns>
+        private static string PrimaryKeysComparator(this IEntityMapping mapping)
+        {
+            var keys = mapping.Pks.ToList();
+            var command = new StringBuilder();
+            var firstKey = keys.First();
+
+            command.Append($"ON [{Target}].[{firstKey.ColumnName}] = [{Source}].[{firstKey.ColumnName}] ");
+            keys.Remove(firstKey);
+
+            if (keys.Any())
+                foreach (var key in keys)
+                    command.Append($"AND [{Target}].[{key.ColumnName}] = [{Source}].[{key.ColumnName}]");
+
+            return command.ToString();
+        }
+
         private static string BuildSelectSet(IEnumerable<string> columns, string identityColumn)
         {
             var command = new StringBuilder();
@@ -195,31 +201,6 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         private static string GetOutputCreateTableCmd(string tmpTablename, string identityColumn)
         {
             return $"CREATE TABLE {tmpTablename}([{identityColumn}] int); ";
-        }
-
-        private static string GetSchemaType(this IPropertyMapping column, string columnType)
-        {
-            switch (columnType)
-            {
-                case "varchar":
-                case "nvarchar":
-                case "char":
-                case "binary":
-                case "varbinary":
-                case "nchar":
-                    if (column.MaxLength != 0)
-                        columnType = columnType + $"({column.MaxLength})";
-                    break;
-                case "decimal":
-                case "numeric":
-                    columnType = columnType + $"({column.Precision}, {column.Scale})";
-                    break;
-                case "datetime2":
-                case "time":
-                    break;
-            }
-
-            return columnType;
         }
     }
 }
