@@ -1,5 +1,5 @@
 ﻿using System.Data.Entity;
-using EntityFramework.BulkExtensions.Commons.Mapping;
+using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Mapping;
 
 namespace EntityFramework.BulkExtensions.Extensions

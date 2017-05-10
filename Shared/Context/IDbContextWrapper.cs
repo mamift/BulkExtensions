@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using EntityFramework.BulkExtensions.Commons.Mapping;
 
-namespace EntityFramework.BulkExtensions.Commons.Mapping
+namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal interface IDbContextWrapper
     {

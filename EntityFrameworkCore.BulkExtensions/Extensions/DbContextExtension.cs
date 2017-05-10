@@ -1,4 +1,4 @@
-﻿using EntityFramework.BulkExtensions.Commons.Mapping;
+﻿using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFrameworkCore.BulkExtensions.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
