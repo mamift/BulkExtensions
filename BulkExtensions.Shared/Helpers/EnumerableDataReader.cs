@@ -21,11 +21,6 @@ namespace Shared.Helpers
             _collection = collection.ToList();
             _enumerator = _collection.GetEnumerator();
             _enumerator.Reset();
-            IsClosed = false;
-            Depth = 0;
-            RecordsAffected = -1;
-            HasRows = _collection.Any();
-            FieldCount = _collection.First().Length;
             _columnGuids = new List<Guid>();
             foreach (var unused in _columns)
             {
@@ -33,14 +28,19 @@ namespace Shared.Helpers
             }
         }
 
+#if !NETSTANDARD1_3
+
         public override void Close()
         {
+            throw new NotImplementedException();
         }
 
         public override DataTable GetSchemaTable()
         {
-            return null;
+            throw new NotImplementedException();
         }
+
+#endif
 
         public override bool NextResult()
         {
@@ -58,13 +58,13 @@ namespace Shared.Helpers
             return moved;
         }
 
-        public override int Depth { get; }
-        public override bool IsClosed { get; }
-        public override int RecordsAffected { get; }
+        public override int Depth => 0;
+        public override bool IsClosed => false;
+        public override int RecordsAffected => -1;
 
         public override bool GetBoolean(int ordinal)
         {
-            return (bool)_currentElement[ordinal];
+            return (bool) _currentElement[ordinal];
         }
 
         public override byte GetByte(int ordinal)
@@ -94,22 +94,22 @@ namespace Shared.Helpers
 
         public override short GetInt16(int ordinal)
         {
-            return (short)_currentElement[ordinal];
+            return (short) _currentElement[ordinal];
         }
 
         public override int GetInt32(int ordinal)
         {
-            return (int)_currentElement[ordinal];
+            return (int) _currentElement[ordinal];
         }
 
         public override long GetInt64(int ordinal)
         {
-            return (long)_currentElement[ordinal];
+            return (long) _currentElement[ordinal];
         }
 
         public override DateTime GetDateTime(int ordinal)
         {
-            return (DateTime)_currentElement[ordinal];
+            return (DateTime) _currentElement[ordinal];
         }
 
         public override string GetString(int ordinal)
@@ -119,17 +119,17 @@ namespace Shared.Helpers
 
         public override decimal GetDecimal(int ordinal)
         {
-            return (decimal)_currentElement[ordinal];
+            return (decimal) _currentElement[ordinal];
         }
 
         public override double GetDouble(int ordinal)
         {
-            return (double)_currentElement[ordinal];
+            return (double) _currentElement[ordinal];
         }
 
         public override float GetFloat(int ordinal)
         {
-            return (float)_currentElement[ordinal];
+            return (float) _currentElement[ordinal];
         }
 
         public override string GetName(int ordinal)
@@ -147,7 +147,7 @@ namespace Shared.Helpers
             return _currentElement[ordinal] == null;
         }
 
-        public override int FieldCount { get; }
+        public override int FieldCount => _collection.First().Length;
 
         public override object this[int ordinal] => _currentElement;
 
@@ -160,7 +160,7 @@ namespace Shared.Helpers
             }
         }
 
-        public override bool HasRows { get; }
+        public override bool HasRows => _collection.Any();
 
         public override int GetOrdinal(string name)
         {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
+using BulkExtensions.Options;
 using EntityFramework.BulkExtensions.Commons.BulkOperations;
-using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Extensions;
 
 namespace EntityFramework.BulkExtensions

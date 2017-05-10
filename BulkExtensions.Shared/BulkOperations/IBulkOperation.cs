@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using BulkExtensions.Options;
 using EntityFramework.BulkExtensions.Commons.Context;
-using EntityFramework.BulkExtensions.Commons.Helpers;
 
 namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 {

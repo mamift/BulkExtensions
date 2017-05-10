@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BulkExtensions.Options;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Helpers;
@@ -10,16 +11,15 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
     /// <summary>
     /// 
     /// </summary>
-    internal class BulkUpdate : IBulkOperation
+    internal class BulkDelete : IBulkOperation
     {
-        /// <summary>
-        /// 
-        /// </summary>
+        ///  <summary>
+        ///  </summary>
         /// <param name="context"></param>
         /// <param name="collection"></param>
         /// <param name="options"></param>
         /// <typeparam name="TEntity"></typeparam>
-        /// <returns></returns>
+        ///  <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(IDbContextWrapper context, IEnumerable<TEntity> collection, Options options)
         {
             var tmpTableName = context.EntityMapping.RandomTableName();
@@ -31,14 +31,14 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 
             try
             {
-                //Create temporary table.
-                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Update));                
+                //Create temporary table with only the primary keys.
+                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Delete));
 
-                //Bulk inset data to temporary temporary table.
-                context.BulkInsertToTable(entityList, tmpTableName, OperationType.Update);
+                //Bulk inset data to temporary table.
+                context.BulkInsertToTable(entityList, tmpTableName, OperationType.Delete);
 
-                //Copy data from temporary table to destination table.
-                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName));
+                //Merge delete items from the target table that matches ids from the temporary table.
+                var affectedRows = context.ExecuteSqlCommand(context.BuildDeleteCommand(tmpTableName));
 
                 //Commit if internal transaction exists.
                 context.Commit();
@@ -50,6 +50,6 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 context.Rollback();
                 throw;
             }
-        }        
+        }
     }
 }

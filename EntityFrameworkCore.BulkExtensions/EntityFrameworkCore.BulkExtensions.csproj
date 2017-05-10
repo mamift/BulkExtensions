@@ -63,12 +63,5 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\Shared\Shared.projitems" Label="Shared" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="..\BulkExtensions.Shared\BulkExtensions.Shared.projitems" Label="BulkExtensions.Shared" Condition="Exists('..\BulkExtensions.Shared\BulkExtensions.Shared.projitems')" />
 </Project>
