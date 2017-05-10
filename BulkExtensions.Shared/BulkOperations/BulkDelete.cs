@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BulkExtensions.Options;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Helpers;
@@ -20,7 +19,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
         /// <param name="options"></param>
         /// <typeparam name="TEntity"></typeparam>
         ///  <returns></returns>
-        int IBulkOperation.CommitTransaction<TEntity>(IDbContextWrapper context, IEnumerable<TEntity> collection, Options options)
+        int IBulkOperation.CommitTransaction<TEntity>(IDbContextWrapper context, IEnumerable<TEntity> collection, BulkOptions options)
         {
             var tmpTableName = context.EntityMapping.RandomTableName();
             var entityList = collection.ToList();

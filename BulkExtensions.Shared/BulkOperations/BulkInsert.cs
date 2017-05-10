@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BulkExtensions.Options;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Helpers;
@@ -19,7 +18,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
         /// <param name="options"></param>
         /// <returns></returns>
         int IBulkOperation.CommitTransaction<TEntity>(IDbContextWrapper context, IEnumerable<TEntity> collection,
-            Options options)
+            BulkOptions options)
         {
             var entityList = collection.ToList();
             if (!entityList.Any())
@@ -30,7 +29,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
             try
             {
                 //Return generated IDs for bulk inserted elements.
-                if (options.HasFlag(Options.OutputIdentity))
+                if (options.HasFlag(BulkOptions.OutputIdentity))
                 {
                     var tmpTableName = context.EntityMapping.RandomTableName();
                     //Create temporary table.

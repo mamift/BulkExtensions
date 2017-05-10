@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace BulkExtensions.Options
+namespace EntityFramework.BulkExtensions.Commons.Helpers
 {
     [Flags]
-    public enum Options
+    public enum BulkOptions
     {
         Default = 1,
         OutputIdentity = 2

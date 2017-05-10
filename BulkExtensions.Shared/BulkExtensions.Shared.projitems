@@ -22,7 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\EnumerableDataReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\GuidHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\OperationType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Helpers\Options.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\BulkOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\SqlHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\EntityMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IEntityMapping.cs" />
