@@ -28,11 +28,13 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <param name="tableName"></param>
-        /// <param name="operationType"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        internal static string CreateTempTable(this IEntityMapping mapping, string tableName, OperationType operationType)
+        internal static string CreateTempTable(this IEntityMapping mapping, string tableName, OperationType operationType, BulkOptions options)
         {
-            var columns = mapping.Properties.FilterProperties(operationType).ToList();
+            var columns = mapping.Properties
+                .FilterPropertiesByOperation(operationType)
+                .ToList();
 
             var paramList = columns.Select(column => $"[{column.ColumnName}]")
                 .ToList();
@@ -48,10 +50,10 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                    GetDropTableCommand(tmpTableName);
         }
 
-        internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName)
+        internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName, OperationType operationType, BulkOptions options)
         {
             return $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildUpdateSet()}; " +
+                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildUpdateSet(operationType, options)}; " +
                    GetDropTableCommand(tmpTableName);
         }
 
@@ -64,9 +66,12 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <param name="identityColumn"></param>
         /// <returns></returns>
         internal static string GetInsertIntoStagingTableCmd(this IEntityMapping mapping, string tmpOutputTableName,
-            string tmpTableName, string identityColumn)
+            string tmpTableName, string identityColumn, OperationType operationType, BulkOptions options)
         {
-            var columns = mapping.Properties.Select(propertyMapping => propertyMapping.ColumnName).ToList();
+            var columns = mapping.Properties
+                .FilterPropertiesByOperation(operationType)
+                .Select(propertyMapping => propertyMapping.ColumnName)
+                .ToList();
 
             var comm = GetOutputCreateTableCmd(tmpOutputTableName, identityColumn)
                        + BuildInsertIntoSet(columns, identityColumn, mapping.FullTableName)
@@ -123,14 +128,16 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <returns></returns>
-        private static string BuildUpdateSet(this IEntityMapping mapping)
+        private static string BuildUpdateSet(this IEntityMapping mapping, OperationType operationType, BulkOptions options)
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
 
             command.Append("SET ");
+            var properties = mapping.Properties
+                .FilterPropertiesByOperation(operationType);
 
-            foreach (var column in mapping.Properties.Where(propertyMapping => !propertyMapping.IsHierarchyMapping))
+            foreach (var column in properties)
             {
                 if (column.IsPk) continue;
 

@@ -33,15 +33,15 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 {
                     var tmpTableName = context.EntityMapping.RandomTableName();
                     //Create temporary table.
-                    context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Insert));
+                    context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Insert, options));
 
                     //Bulk inset data to temporary temporary table.
-                    context.BulkInsertToTable(entityList, tmpTableName, OperationType.Insert);
+                    context.BulkInsertToTable(entityList, tmpTableName, OperationType.Insert, options);
 
                     var tmpOutputTableName = context.EntityMapping.RandomTableName();
                     //Copy data from temporary table to destination table with ID output to another temporary table.
                     var commandText = context.EntityMapping.GetInsertIntoStagingTableCmd(tmpOutputTableName,
-                        tmpTableName, context.EntityMapping.Pks.First().ColumnName);
+                        tmpTableName, context.EntityMapping.Pks.First().ColumnName, OperationType.Insert, options);
                     context.ExecuteSqlCommand(commandText);
 
                     //Load generated IDs from temporary output table into the entities.
@@ -50,7 +50,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 else
                 {
                     //Bulk inset data to temporary destination table.
-                    context.BulkInsertToTable(entityList, context.EntityMapping.FullTableName, OperationType.Insert);
+                    context.BulkInsertToTable(entityList, context.EntityMapping.FullTableName, OperationType.Insert, options);
                 }
 
                 //Commit if internal transaction exists.

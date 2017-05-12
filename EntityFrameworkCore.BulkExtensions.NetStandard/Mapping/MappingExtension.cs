@@ -60,7 +60,8 @@ namespace EntityFrameworkCore.BulkExtensions.Mapping
                 {
                     PropertyName = property.Name,
                     ColumnName = property.Relational().ColumnName,
-                    IsPk = property.IsPrimaryKey()
+                    IsPk = property.IsPrimaryKey(),
+                    IsFk = property.IsForeignKey()
                 });
         }
     }

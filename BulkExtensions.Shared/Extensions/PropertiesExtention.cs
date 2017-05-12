@@ -8,7 +8,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
     internal static class PropertiesExtention
     {
-        internal static IEnumerable<IPropertyMapping> FilterProperties(this IEnumerable<IPropertyMapping> propertyMappings, OperationType operationType)
+        internal static IEnumerable<IPropertyMapping> FilterPropertiesByOperation(this IEnumerable<IPropertyMapping> propertyMappings, OperationType operationType)
         {
             switch (operationType)
             {
@@ -21,6 +21,15 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                 default:
                     return propertyMappings;
             }
+        }
+
+        internal static IEnumerable<IPropertyMapping> FilterPropertiesByOptions(this IEnumerable<IPropertyMapping> propertyMappings, BulkOptions options)
+        {
+            if (!options.HasFlag(BulkOptions.KeepForeingKeys))
+            {
+                return propertyMappings.Where(property => !property.IsFk);
+            }
+            return propertyMappings;
         }
     }
 }

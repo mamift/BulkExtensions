@@ -1,17 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFramework.BulkExtensions", "EntityFramework.BulkExtensions\EntityFramework.BulkExtensions.csproj", "{0EEFC012-A432-4F85-9745-316A011B9C9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.BulkExtensions", "EntityFrameworkCore.BulkExtensions\EntityFrameworkCore.BulkExtensions.csproj", "{C61BC16E-C135-42F3-A9C3-6256E54ADC2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.BulkExtensions.NetStandard", "EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj", "{13D314C8-FFE3-4C8D-8139-2CFE43214083}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.BulkExtensions.NetStandard", "EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj", "{13D314C8-FFE3-4C8D-8139-2CFE43214083}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BulkExtensions.Shared", "BulkExtensions.Shared\BulkExtensions.Shared.shproj", "{F6FDEB96-A3DF-4CCF-A0E0-AF0E8881E955}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCore2", "TestCore2\TestCore2.csproj", "{43D727BC-B982-4159-AB29-396A2C9680E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{7725A004-53D9-464F-9E68-E23068B76A48}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		BulkExtensions.Shared\BulkExtensions.Shared.projitems*{0eefc012-a432-4f85-9745-316a011b9c9c}*SharedItemsImports = 4
+		BulkExtensions.Shared\BulkExtensions.Shared.projitems*{c61bc16e-c135-42f3-a9c3-6256e54adc2a}*SharedItemsImports = 4
+		BulkExtensions.Shared\BulkExtensions.Shared.projitems*{f6fdeb96-a3df-4ccf-a0e0-af0e8881e955}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -29,6 +38,14 @@ Global
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43D727BC-B982-4159-AB29-396A2C9680E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43D727BC-B982-4159-AB29-396A2C9680E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43D727BC-B982-4159-AB29-396A2C9680E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43D727BC-B982-4159-AB29-396A2C9680E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7725A004-53D9-464F-9E68-E23068B76A48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7725A004-53D9-464F-9E68-E23068B76A48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7725A004-53D9-464F-9E68-E23068B76A48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7725A004-53D9-464F-9E68-E23068B76A48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

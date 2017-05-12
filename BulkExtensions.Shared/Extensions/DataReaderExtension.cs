@@ -10,9 +10,11 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
     internal static class DataReaderExtension
     {
         internal static EnumerableDataReader ToDataReader<TEntity>(this IEnumerable<TEntity> entities, IEntityMapping mapping,
-            OperationType operationType) where TEntity : class
+            OperationType operationType, BulkOptions options) where TEntity : class
         {
-            var tableColumns = mapping.Properties.FilterProperties(operationType).ToList();
+            var tableColumns = mapping.Properties
+                .FilterPropertiesByOperation(operationType)
+                .ToList();
             var rows = new List<object[]>();
 
             foreach (var item in entities)

@@ -15,9 +15,9 @@ namespace EntityFramework.BulkExtensions
         /// <param name="option"></param>
         /// <typeparam name="TEntity">The type of the objects collection. TEntity must be a class.</typeparam>
         /// <returns>The number of affected rows.</returns>
-        public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, Options option = Options.Default) where TEntity : class
+        public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, InsertOptions options = InsertOptions.Default) where TEntity : class
         {
-            return OperationFactory.BulkInsert.CommitTransaction(context.GetContextWrapper<TEntity>(), entities, option.ToSharedOptions());
+            return OperationFactory.BulkInsert.CommitTransaction(context.GetContextWrapper<TEntity>(), entities, options.ToSharedOptions());
         }
 
         /// <summary>
