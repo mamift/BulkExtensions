@@ -11,10 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.BulkExt
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BulkExtensions.Shared", "BulkExtensions.Shared\BulkExtensions.Shared.shproj", "{F6FDEB96-A3DF-4CCF-A0E0-AF0E8881E955}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCore2", "TestCore2\TestCore2.csproj", "{43D727BC-B982-4159-AB29-396A2C9680E4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{7725A004-53D9-464F-9E68-E23068B76A48}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BulkExtensions.Shared\BulkExtensions.Shared.projitems*{0eefc012-a432-4f85-9745-316a011b9c9c}*SharedItemsImports = 4
@@ -38,14 +34,6 @@ Global
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13D314C8-FFE3-4C8D-8139-2CFE43214083}.Release|Any CPU.Build.0 = Release|Any CPU
-		{43D727BC-B982-4159-AB29-396A2C9680E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{43D727BC-B982-4159-AB29-396A2C9680E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{43D727BC-B982-4159-AB29-396A2C9680E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{43D727BC-B982-4159-AB29-396A2C9680E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7725A004-53D9-464F-9E68-E23068B76A48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7725A004-53D9-464F-9E68-E23068B76A48}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7725A004-53D9-464F-9E68-E23068B76A48}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7725A004-53D9-464F-9E68-E23068B76A48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
