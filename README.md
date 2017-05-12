@@ -111,6 +111,6 @@ context.BulkDelete(entityList);
 /* This operation will delete all the entities in the list from the database. */
 ```
 ## Credits
-This library is based on the <a href="https://github.com/gtaylor44/SqlBulkTools">SqlBulkTools</a> by Greg Taylor.
+This library is based on the SqlBulkTools by Greg Taylor.
 
 
