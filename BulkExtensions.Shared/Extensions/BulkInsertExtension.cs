@@ -2,16 +2,27 @@
 using System.Data.SqlClient;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Helpers;
+using EntityFramework.BulkExtensions.Commons.Mapping;
+using System.Linq;
 
 namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
     internal static class BulkInsertExtension
     {
-        internal static void BulkInsertToTable<TEntity>(this IDbContextWrapper context, IEnumerable<TEntity> entities,
-            string tableName, OperationType operationType, BulkOptions options) where TEntity : class
+        internal static void BulkInsertToTable<TEntity>(this IDbContextWrapper context, IList<TEntity> entities,
+            string tableName, Operation operationType, BulkOptions options) where TEntity : class
         {
             var properties = context.EntityMapping.Properties
-                .FilterPropertiesByOperation(operationType);
+                .FilterPropertiesByOperation(operationType)
+                .ToList();
+            if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
+            {
+                properties.Add(new PropertyMapping
+                {
+                    ColumnName = SqlHelper.Identity,
+                    PropertyName = SqlHelper.Identity
+                });
+            }
             var dataReader = entities.ToDataReader(context.EntityMapping, operationType, options);
 
             using (var bulkcopy = new SqlBulkCopy((SqlConnection) context.Connection,

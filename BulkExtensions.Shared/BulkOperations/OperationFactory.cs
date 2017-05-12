@@ -6,6 +6,8 @@
 
         internal static IBulkOperation BulkUpdate => new BulkUpdate();
 
+        internal static IBulkOperation BulkInsertOrUpdate => new BulkInsertOrUpdate();
+
         internal static IBulkOperation BulkDelete => new BulkDelete();
     }
 }

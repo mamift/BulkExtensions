@@ -9,12 +9,21 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
     internal static class DataReaderExtension
     {
-        internal static EnumerableDataReader ToDataReader<TEntity>(this IEnumerable<TEntity> entities, IEntityMapping mapping,
-            OperationType operationType, BulkOptions options) where TEntity : class
+        internal static EnumerableDataReader ToDataReader<TEntity>(this IList<TEntity> entities, IEntityMapping mapping,
+            Operation operationType, BulkOptions options) where TEntity : class
         {
             var tableColumns = mapping.Properties
                 .FilterPropertiesByOperation(operationType)
                 .ToList();
+            if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
+            {
+                tableColumns.Add(new PropertyMapping
+                {
+                    ColumnName = SqlHelper.Identity,
+                    PropertyName = SqlHelper.Identity
+                });
+            }
+                
             var rows = new List<object[]>();
 
             foreach (var item in entities)
@@ -29,6 +38,8 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                         row.Add(prop.GetValue(item, null));
                     else if (column.IsHierarchyMapping)
                         row.Add(mapping.HierarchyMapping[item.GetType().Name]);
+                    else if (column.PropertyName.Equals(SqlHelper.Identity))
+                        row.Add(entities.IndexOf(item));
                     else
                         row.Add(null);
                 }

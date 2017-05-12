@@ -8,15 +8,15 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
     internal static class PropertiesExtention
     {
-        internal static IEnumerable<IPropertyMapping> FilterPropertiesByOperation(this IEnumerable<IPropertyMapping> propertyMappings, OperationType operationType)
+        internal static IEnumerable<IPropertyMapping> FilterPropertiesByOperation(this IEnumerable<IPropertyMapping> propertyMappings, Operation operationType)
         {
             switch (operationType)
             {
-                case OperationType.Insert:
+                case Operation.Insert:
                     return propertyMappings.Where(propertyMapping => !propertyMapping.IsPk).ToList();
-                case OperationType.Delete:
+                case Operation.Delete:
                     return propertyMappings.Where(propertyMapping => propertyMapping.IsPk).ToList();
-                case OperationType.Update:
+                case Operation.Update:
                     return propertyMappings.Where(propertyMapping => !propertyMapping.IsHierarchyMapping).ToList();
                 default:
                     return propertyMappings;

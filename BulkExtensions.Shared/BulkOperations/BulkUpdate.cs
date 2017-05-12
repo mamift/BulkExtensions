@@ -32,13 +32,13 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
             try
             {
                 //Create temporary table.
-                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Update, options));                
+                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, Operation.Update, options));                
 
                 //Bulk inset data to temporary temporary table.
-                context.BulkInsertToTable(entityList, tmpTableName, OperationType.Update, options);
+                context.BulkInsertToTable(entityList, tmpTableName, Operation.Update, options);
 
                 //Copy data from temporary table to destination table.
-                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName, OperationType.Update, options));
+                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName, Operation.Update));
 
                 //Commit if internal transaction exists.
                 context.Commit();

@@ -54,6 +54,16 @@ namespace EntityFramework.BulkExtensions.Commons.Context
             return list;
         }
 
+        public IDataReader SqlQuery(string command)
+        {
+            var sqlCommand = Connection.CreateCommand();
+            sqlCommand.Transaction = Transaction;
+            sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandText = command;
+
+            return sqlCommand.ExecuteReader();
+        }
+
         public void Commit()
         {
             if (IsInternalTransaction)

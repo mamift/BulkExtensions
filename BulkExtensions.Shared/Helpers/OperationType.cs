@@ -1,9 +1,10 @@
 ﻿namespace EntityFramework.BulkExtensions.Commons.Helpers
 {
-    internal enum OperationType
+    internal enum Operation
     {
         Insert,
         Update,
-        Delete
+        Delete,
+        InsertOrUpdate
     }
 }

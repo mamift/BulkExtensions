@@ -31,10 +31,10 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
             try
             {
                 //Create temporary table with only the primary keys.
-                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, OperationType.Delete, options));
+                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, Operation.Delete, options));
 
                 //Bulk inset data to temporary table.
-                context.BulkInsertToTable(entityList, tmpTableName, OperationType.Delete, options);
+                context.BulkInsertToTable(entityList, tmpTableName, Operation.Delete, options);
 
                 //Merge delete items from the target table that matches ids from the temporary table.
                 var affectedRows = context.ExecuteSqlCommand(context.BuildDeleteCommand(tmpTableName));

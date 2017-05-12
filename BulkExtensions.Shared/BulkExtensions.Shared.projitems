@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkDelete.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkInsert.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkInsertOrUpdate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkUpdate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\IBulkOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\OperationFactory.cs" />

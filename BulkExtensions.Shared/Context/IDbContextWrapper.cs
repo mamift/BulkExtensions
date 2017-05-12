@@ -14,6 +14,8 @@ namespace EntityFramework.BulkExtensions.Commons.Context
 
         IEnumerable<T> SqlQuery<T>(string command) where T : struct;
 
+        IDataReader SqlQuery(string command);
+
         void Commit();
 
         void Rollback();
