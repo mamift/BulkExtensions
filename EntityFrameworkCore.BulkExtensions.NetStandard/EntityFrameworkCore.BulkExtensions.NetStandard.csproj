@@ -16,5 +16,5 @@
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0">
     </PackageReference>
   </ItemGroup>
-  <Import Project="..\BulkExtensions.Shared\BulkExtensions.Shared.projitems" Label="BulkExtensions.Shared" Condition="Exists('..\BulkExtensions.Shared\BulkExtensions.Shared.projitems')" />
+  <Import Project="..\BulkExtensions.Shared\BulkExtensions.Shared.projitems" Label="Shared" />
 </Project>
