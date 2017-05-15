@@ -38,9 +38,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 context.BulkInsertToTable(entityList, tmpTableName, Operation.Update, options);
 
                 //Copy data from temporary table to destination table.
-                var command = context.BuildMergeCommand(tmpTableName, Operation.Update);
-                command += $";{SqlHelper.GetDropTableCommand(tmpTableName)}";
-                var affectedRows = context.ExecuteSqlCommand(command);
+                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName, Operation.Update));
 
                 //Commit if internal transaction exists.
                 context.Commit();

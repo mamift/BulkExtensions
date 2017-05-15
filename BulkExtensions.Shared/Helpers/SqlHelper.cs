@@ -60,7 +60,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             if(operationType == Operation.Update)
             {
                 command += context.EntityMapping.BuildMergeUpdateSet();
-                
+                command += $";{GetDropTableCommand(tmpTableName)}";
             }
             else if(operationType == Operation.InsertOrUpdate)
             {
