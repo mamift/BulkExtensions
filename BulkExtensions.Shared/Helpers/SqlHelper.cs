@@ -144,11 +144,11 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
                     else
                         throw new Exception();
-                }
-
-                command = GetDropTableCommand(outputTableName);
-                context.ExecuteSqlCommand(command);
+                }               
             }
+
+            command = GetDropTableCommand(outputTableName);
+            context.ExecuteSqlCommand(command);
         }
 
         /// <summary>
