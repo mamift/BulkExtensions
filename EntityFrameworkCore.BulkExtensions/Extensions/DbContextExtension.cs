@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityFrameworkCore.BulkExtensions.Extensions
+namespace EntityFramework.BulkExtensions.Extensions
 {
     internal static class DbContextExtension
     {

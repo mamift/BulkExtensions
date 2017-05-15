@@ -1,11 +1,11 @@
 ﻿using EntityFramework.BulkExtensions.Commons.Context;
-using EntityFrameworkCore.BulkExtensions.Mapping;
+using EntityFramework.BulkExtensions.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityFrameworkCore.BulkExtensions.Extensions
+namespace EntityFramework.BulkExtensions.Extensions
 {
     internal static class DbContextExtension
     {

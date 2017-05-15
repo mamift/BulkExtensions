@@ -47,9 +47,7 @@
     <Compile Include="BulkExtensions.cs" />
     <Compile Include="Extensions\DbContextExtension.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
-    <Compile Include="Flags\UpdateOptions.cs" />
     <Compile Include="Mapping\MappingExtension.cs" />
-    <Compile Include="Flags\InsertOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

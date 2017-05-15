@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using EntityFramework.BulkExtensions.Commons.BulkOperations;
-using EntityFrameworkCore.BulkExtensions.Extensions;
+using EntityFramework.BulkExtensions.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityFrameworkCore.BulkExtensions
+namespace EntityFramework.BulkExtensions
 {
     public static class BulkExtensions
     {
@@ -12,7 +12,7 @@ namespace EntityFrameworkCore.BulkExtensions
         /// </summary>
         /// <param name="context">The EntityFramework DbContext object.</param>
         /// <param name="entities">The collection of objects to be inserted.</param>
-        /// <param name="option"></param>
+        /// <param name="options"></param>
         /// <typeparam name="TEntity">The type of the objects collection. TEntity must be a class.</typeparam>
         /// <returns>The number of affected rows.</returns>
         public static int BulkInsert<TEntity>(this DbContext context, IEnumerable<TEntity> entities, InsertOptions options = InsertOptions.Default) where TEntity : class
@@ -37,6 +37,7 @@ namespace EntityFrameworkCore.BulkExtensions
         /// </summary>
         /// <param name="context">The EntityFramework DbContext object.</param>
         /// <param name="entities">The collection of objects to be updated.</param>
+        /// <param name="options"></param>
         /// <typeparam name="TEntity">The type of the objects collection. TEntity must be a class.</typeparam>
         /// <returns>The number of affected rows.</returns>
         public static int BulkInsertOrUpdate<TEntity>(this DbContext context, IEnumerable<TEntity> entities, InsertOptions options = InsertOptions.Default) where TEntity : class

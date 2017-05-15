@@ -2,10 +2,10 @@
 {
     public interface IPropertyMapping
     {
-        string PropertyName { get; set; }
-        string ColumnName { get; set; }
-        bool IsPk { get; set; }
-        bool IsFk { get; set; }
-        bool IsHierarchyMapping { get; set; }
+        string PropertyName { get; }
+        string ColumnName { get; }
+        bool IsPk { get; }
+        bool IsFk { get; }
+        bool IsHierarchyMapping { get; }
     }
 }

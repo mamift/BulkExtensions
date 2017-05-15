@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFramework.BulkExtensi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.BulkExtensions", "EntityFrameworkCore.BulkExtensions\EntityFrameworkCore.BulkExtensions.csproj", "{C61BC16E-C135-42F3-A9C3-6256E54ADC2A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.BulkExtensions.NetStandard", "EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj", "{13D314C8-FFE3-4C8D-8139-2CFE43214083}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.BulkExtensions.NetStandard", "EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj", "{13D314C8-FFE3-4C8D-8139-2CFE43214083}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BulkExtensions.Shared", "BulkExtensions.Shared\BulkExtensions.Shared.shproj", "{F6FDEB96-A3DF-4CCF-A0E0-AF0E8881E955}"
 EndProject

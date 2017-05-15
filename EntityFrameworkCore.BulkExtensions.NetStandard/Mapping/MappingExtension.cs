@@ -4,7 +4,7 @@ using EntityFramework.BulkExtensions.Commons.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace EntityFrameworkCore.BulkExtensions.Mapping
+namespace EntityFramework.BulkExtensions.Mapping
 {
     internal static class MappingExtension
     {

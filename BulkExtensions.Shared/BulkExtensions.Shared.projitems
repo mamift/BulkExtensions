@@ -20,6 +20,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkInsertExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DataReaderExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\PropertiesExtention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Flags\InsertOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Flags\UpdateOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\EnumerableDataReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\GuidHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\OperationType.cs" />

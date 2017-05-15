@@ -29,6 +29,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <param name="tableName"></param>
+        /// <param name="operationType"></param>
         /// <param name="options"></param>
         /// <returns></returns>
         internal static string CreateTempTable(this IEntityMapping mapping, string tableName, Operation operationType, BulkOptions options)
@@ -60,21 +61,22 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName, Operation operationType)
         {
-            var insertCommand = operationType == Operation.InsertOrUpdate ? context.EntityMapping.BuildInsertSet() : string.Empty;
+            var insertCommand = operationType == Operation.InsertOrUpdate ? context.EntityMapping.BuildMergeInsertSet() : string.Empty;
             var command = $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildUpdateSet()} " +
+                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildMergeUpdateSet()} " +
                    $"{insertCommand} ";
 
             return command;
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="mapping"></param>
         /// <param name="outputTableName"></param>
         /// <param name="tmpTableName"></param>
         /// <param name="identityColumn"></param>
+        /// <param name="operationType"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
         internal static string GetInsertIntoStagingTableCmd(this IEntityMapping mapping, string outputTableName,
             string tmpTableName, string identityColumn, Operation operationType, BulkOptions options)
@@ -84,7 +86,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                 .Select(propertyMapping => propertyMapping.ColumnName)
                 .ToList();
 
-            var comm = GetOutputCreateTableCmd(outputTableName, identityColumn, operationType)
+            var comm = CreateOutputTableCmd(outputTableName, identityColumn, operationType)
                        + BuildInsertIntoSet(columns, identityColumn, mapping.FullTableName)
                        + $"OUTPUT INSERTED.{identityColumn} INTO "
                        + outputTableName + $"([{identityColumn}]) "
@@ -96,13 +98,13 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="outputTableName"></param>
         /// <param name="propertyMapping"></param>
         /// <param name="items"></param>
+        /// <param name="operation"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this IDbContextWrapper context, string outputTableName,
             IPropertyMapping propertyMapping, IList<TEntity> items, Operation operation)
         {
@@ -125,12 +127,11 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
                         else
                             throw new Exception();
-
                     }
                 }
             }
 
-            if (operation == Operation.Insert)
+            else if (operation == Operation.Insert)
             {
                 var identities = context.SqlQuery<int>(command).ToList();
                 foreach (var result in identities)
@@ -164,7 +165,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// </summary>
         /// <param name="mapping"></param>
         /// <returns></returns>
-        private static string BuildUpdateSet(this IEntityMapping mapping)
+        private static string BuildMergeUpdateSet(this IEntityMapping mapping)
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
@@ -183,7 +184,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        private static string BuildInsertSet(this IEntityMapping mapping)
+        private static string BuildMergeInsertSet(this IEntityMapping mapping)
         {
             var command = new StringBuilder();
             var columns = new List<string>();
@@ -193,7 +194,6 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             foreach (var column in mapping.Properties)
             {
-
                 if (!column.IsPk)
                 {
                     columns.Add($"[{column.ColumnName}]");
@@ -211,7 +211,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         internal static string BuildOutputId(string outputTableName, string identityColumn)
         {
-            return $"OUTPUT Source.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn});";
+            return $"OUTPUT Source.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
 
         }
 
@@ -273,13 +273,11 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        internal static string GetOutputCreateTableCmd(string tmpTablename, string identityColumn, Operation operationType)
+        internal static string CreateOutputTableCmd(string tmpTablename, string identityColumn, Operation operationType)
         {
-            if (operationType == Operation.InsertOrUpdate)
-            {
-                return $"CREATE TABLE {tmpTablename} ([{Identity}] int, [{identityColumn}] int)";
-            }
-            return $"CREATE TABLE {tmpTablename}([{identityColumn}] int); ";
+            return operationType == Operation.InsertOrUpdate
+                ? $"CREATE TABLE {tmpTablename} ([{Identity}] int, [{identityColumn}] int)"
+                : $"CREATE TABLE {tmpTablename} ([{identityColumn}] int); ";
         }
     }
 }
