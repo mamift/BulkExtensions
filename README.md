@@ -5,18 +5,15 @@ It works as extension methods of the DBContext class and is very simple to use. 
 <br><br>
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
    
-### Changes in version 1.2
+### Changes in version 1.3
    
-- Removed the EntityFramework.MappingAPI dependency.
-- Handling of the necessary EF metadata build from the ground up.
-- Changed some SQLHelper methods to use the new metadata objects instead of the DBContext.
-- Supports bulk operations for Class Hierarchy entities on Table-per-Hierarchy(TPH) mapping.
-- Supports both Code First and FluentAPI configurations.
-- Changed 'Identity' enum value 'InputOutput' to 'Output'.
+- Added support for EFCore;
+- New feature InsertOrUpdate;
    
 ### Installation
-You can install it using the
-<a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">nuget package</a><br>
+You can install it using the nuget package for your EF version:
+- For EF6: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">EntityFramework.BulkExtensions</a><br>
+- For EFCore: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore">EntityFramework.BulkExtensions.EFCore</a><br>
 
 ## How to use it
 
