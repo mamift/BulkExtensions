@@ -37,7 +37,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 context.BulkInsertToTable(entityList, tmpTableName, Operation.Delete, options);
 
                 //Merge delete items from the target table that matches ids from the temporary table.
-                var affectedRows = context.ExecuteSqlCommand(context.BuildDeleteCommand(tmpTableName));
+                var affectedRows = context.ExecuteSqlCommand(context.BuildMergeCommand(tmpTableName, Operation.Delete));
 
                 //Commit if internal transaction exists.
                 context.Commit();

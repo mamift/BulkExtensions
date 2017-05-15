@@ -52,20 +52,28 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return $"SELECT {paramListConcatenated} INTO {tableName} FROM {mapping.TableName} WHERE 1 = 2";
         }
 
-        internal static string BuildDeleteCommand(this IDbContextWrapper context, string tmpTableName)
-        {
-            return $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN DELETE;" +
-                   GetDropTableCommand(tmpTableName);
-        }
-
         internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName, Operation operationType)
         {
-            var insertCommand = operationType == Operation.InsertOrUpdate ? context.EntityMapping.BuildMergeInsertSet() : string.Empty;
             var command = $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS Target USING {tmpTableName} AS Source " +
-                   $"{context.EntityMapping.PrimaryKeysComparator()} WHEN MATCHED THEN UPDATE {context.EntityMapping.BuildMergeUpdateSet()} " +
-                   $"{insertCommand} ";
+                   $"{context.EntityMapping.PrimaryKeysComparator()} ";
 
+            if(operationType == Operation.Update)
+            {
+                command += context.EntityMapping.BuildMergeUpdateSet();
+                
+            }
+            else if(operationType == Operation.InsertOrUpdate)
+            {
+                command += context.EntityMapping.BuildMergeUpdateSet();
+                command += operationType == Operation.InsertOrUpdate
+                    ? context.EntityMapping.BuildMergeInsertSet()
+                    : string.Empty;
+            }
+            else if(operationType == Operation.Delete)
+            {
+                command += "WHEN MATCHED THEN DELETE;";
+            }
+            
             return command;
         }
 
@@ -170,7 +178,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             var command = new StringBuilder();
             var parameters = new List<string>();
 
-            command.Append("SET ");
+            command.Append("WHEN MATCHED THEN UPDATE SET ");
 
             foreach (var column in mapping.Properties)
             {
