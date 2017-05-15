@@ -12,7 +12,7 @@ It works as extension methods of the DbContext class and is very simple to use. 
 - If the context has no transaction it creates and uses an internal one for safety;
 - Output database generated Ids;
 
-#### Framwork Targets
+#### Framework Targets
 
 - For EF6 you can use it with .NetFramewok 4.5+;
 - For EFCore you can use it with .NetFramewok 4.5.1+ or .NetCore1.0+;
