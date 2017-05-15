@@ -4,6 +4,10 @@
 It works as extension methods of the DbContext class and is very simple to use. The library uses the same connection your context created and if the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
 <br><br>
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
+
+#### Project Targets
+- For EF6 you can use it with .NetFramewok 4.5+;
+- For EFCore you can use it with .NetFramewok 4.5.1+ or .NetCore1.0+;
    
 ### Overall features
 
