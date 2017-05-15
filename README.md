@@ -1,9 +1,16 @@
 # BulkExtensions
 
    This project was built as an extension to add bulk operations functionality to the Entity Framework. 
-It works as extension methods of the DBContext class and is very simple to use. If the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
+It works as extension methods of the DbContext class and is very simple to use. The library uses the same connection your context created and if the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
 <br><br>
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
+   
+### Overall features
+
+- Bulk insert, update, insert or update, delete operations;
+- Uses the same connection and transaction of the context;
+- If the context has no transaction it creates and uses an internal one for safety;
+- Output database generated Ids;
    
 ### Changes in version 1.3
    
@@ -16,6 +23,20 @@ You can install it using the nuget package for your EF version:
 - For EFCore: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore">EntityFramework.BulkExtensions.EFCore</a><br>
 
 ## How to use it
+You just need to call the methods bellow for the feature you want to use passing the collection of entities to perform the operation.
+```c#
+context.BulkInsert(entities);
+context.BulkUpdate(entities);
+context.BulkInsertOrUpdate(entities);
+context.BulkDelete(entities);
+
+//Generated Ids are populated by adding the optional parammeter
+
+context.BulkInsert(entities, InsertOptions.OutputIdentity);
+context.BulkInsertOrUpdate(entities, InsertOptions.OutputIdentity);
+```
+
+## Examples
 
 ### Bulk insert
    There is two ways of using this method. By only using the list as parameters for this extension method it will perform a standard SqlBulkCopy operation, witch will not return the Ids of the inserted entities because of a limitation of the SqlBulkCopy class. 
