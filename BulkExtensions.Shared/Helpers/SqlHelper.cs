@@ -40,7 +40,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         {
             var paramList = mapping.Properties
                 .FilterPropertiesByOperation(operationType)
-                .Select(column => $"[{Source}.{column.ColumnName}]")
+                .Select(column => $"{Source}.[{column.ColumnName}]")
                 .ToList();
 
             if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
@@ -57,8 +57,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName,
             Operation operationType)
         {
-            var command =
-                $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS {Target} USING {tmpTableName} AS {Source} " +
+            var command = $"MERGE INTO {context.EntityMapping.FullTableName} WITH (HOLDLOCK) AS {Target} USING {tmpTableName} AS {Source} " +
                 $"{context.EntityMapping.PrimaryKeysComparator()} ";
 
             switch (operationType)
@@ -130,7 +129,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                 {
                     while (reader.Read())
                     {
-                        var item = items.ElementAt((int) reader[0]);
+                        var item = items.ElementAt((int)reader[0]);
 
                         var property = item.GetType().GetProperty(propertyMapping.PropertyName);
 
@@ -223,8 +222,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         internal static string BuildOutputId(string outputTableName, string identityColumn)
         {
-            return
-                $"OUTPUT {Source}.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
+            return $"OUTPUT {Source}.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
         }
 
         /// <summary>
