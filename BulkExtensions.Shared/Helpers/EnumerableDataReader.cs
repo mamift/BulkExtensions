@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if !NETSTANDARD1_3
 using System.Data;
+#endif
 using System.Data.Common;
 using System.Linq;
 
@@ -15,7 +17,7 @@ namespace Shared.Helpers
         private readonly IEnumerator _enumerator;
         private readonly IList<Guid> _columnGuids;
 
-        public EnumerableDataReader(IEnumerable<string> columns, IEnumerable<object[]> collection)
+        internal EnumerableDataReader(IEnumerable<string> columns, IEnumerable<object[]> collection)
         {
             _columns = columns.ToList();
             _collection = collection.ToList();
@@ -32,12 +34,11 @@ namespace Shared.Helpers
 
         public override void Close()
         {
-            throw new NotImplementedException();
         }
 
         public override DataTable GetSchemaTable()
         {
-            throw new NotImplementedException();
+            return new DataTable();
         }
 
 #endif
@@ -69,22 +70,22 @@ namespace Shared.Helpers
 
         public override byte GetByte(int ordinal)
         {
-            throw new NotImplementedException();
+            return (byte) _currentElement[ordinal];
         }
 
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
         {
-            throw new NotImplementedException();
+            return (long) _currentElement[ordinal];
         }
 
         public override char GetChar(int ordinal)
         {
-            throw new NotImplementedException();
+            return (char) _currentElement[ordinal];
         }
 
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
         {
-            throw new NotImplementedException();
+            return (long) _currentElement[ordinal];
         }
 
         public override Guid GetGuid(int ordinal)
@@ -139,7 +140,7 @@ namespace Shared.Helpers
 
         public override int GetValues(object[] values)
         {
-            throw new NotImplementedException();
+            return values.Length;
         }
 
         public override bool IsDBNull(int ordinal)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using EntityFramework.BulkExtensions.Commons.Exceptions;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -17,6 +18,9 @@ namespace EntityFramework.BulkExtensions.Mapping
         internal static IEntityMapping Mapping<TEntity>(this DbContext context) where TEntity : class
         {
             var entityType = context.Model.FindEntityType(typeof(TEntity));
+            if (entityType == null)
+                throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
+
             var relational = entityType.Relational();
             var baseType = entityType.BaseType ?? entityType;
             var hierarchy = context.Model.GetEntityTypes()

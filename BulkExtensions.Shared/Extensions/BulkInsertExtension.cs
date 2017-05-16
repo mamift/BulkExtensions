@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Linq;
 using EntityFramework.BulkExtensions.Commons.Context;
+using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
@@ -25,8 +26,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             }
             var dataReader = entities.ToDataReader(context.EntityMapping, operationType, options);
 
-            using (var bulkcopy = new SqlBulkCopy((SqlConnection) context.Connection,
-                SqlBulkCopyOptions.Default | SqlBulkCopyOptions.KeepIdentity,
+            using (var bulkcopy = new SqlBulkCopy((SqlConnection) context.Connection, SqlBulkCopyOptions.Default,
                 (SqlTransaction) context.Transaction))
             {
                 foreach (var column in properties)

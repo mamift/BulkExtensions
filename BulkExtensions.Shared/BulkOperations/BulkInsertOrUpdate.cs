@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Extensions;
+using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 
 namespace EntityFramework.BulkExtensions.Commons.BulkOperations

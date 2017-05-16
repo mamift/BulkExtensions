@@ -1,4 +1,4 @@
-﻿using EntityFramework.BulkExtensions.Commons.Helpers;
+﻿using EntityFramework.BulkExtensions.Commons.Flags;
 
 namespace EntityFramework.BulkExtensions.Extensions
 {

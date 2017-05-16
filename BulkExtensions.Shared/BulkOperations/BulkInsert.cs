@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions.Commons.Context;
 using EntityFramework.BulkExtensions.Commons.Extensions;
+using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 
 namespace EntityFramework.BulkExtensions.Commons.BulkOperations
@@ -41,7 +42,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                     var tmpOutputTableName = context.EntityMapping.RandomTableName();
                     //Copy data from temporary table to destination table with ID output to another temporary table.
                     var commandText = context.EntityMapping.GetInsertIntoStagingTableCmd(tmpOutputTableName,
-                        tmpTableName, context.EntityMapping.Pks.First().ColumnName, Operation.Insert, options);
+                        tmpTableName, context.EntityMapping.Pks.First().ColumnName, Operation.Insert);
                     context.ExecuteSqlCommand(commandText);
 
                     //Load generated IDs from temporary output table into the entities.

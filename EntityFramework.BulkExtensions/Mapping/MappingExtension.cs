@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
-using System.Data.Entity.Core;
 using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using EntityFramework.BulkExtensions.Commons.Exceptions;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
 namespace EntityFramework.BulkExtensions.Mapping
@@ -27,7 +27,7 @@ namespace EntityFramework.BulkExtensions.Mapping
             var entityMapping = new EntityMapping
             {
                 TableName = mappings.GetTableName(),
-                Schema = mappings.GetTableSchema(),
+                Schema = mappings.GetTableSchema()
             };
 
             if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping))
@@ -153,7 +153,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .GetItems<EntityType>(DataSpace.OSpace)
                 .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
             if (entityType == null)
-                throw new EntityException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
+                throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
             var entitySet = metadata
                 .GetItems<EntityContainer>(DataSpace.CSpace)
