@@ -36,32 +36,30 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 
             try
             {
+                var pk = context.EntityMapping.Pks.FirstOrDefault(pkey => pkey.IsStoreGenerated);
                 //Create temporary table.
                 context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, Operation.InsertOrUpdate, options));
 
                 //Bulk inset data to temporary temporary table.
                 context.BulkInsertToTable(entityList, tmpTableName, Operation.InsertOrUpdate, options);
 
-                if (options.HasFlag(BulkOptions.OutputIdentity))
+                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
                 {
-                    context.ExecuteSqlCommand(SqlHelper.CreateOutputTableCmd(outputTableName,
-                        context.EntityMapping.Pks.First().ColumnName, Operation.InsertOrUpdate));
+                    context.ExecuteSqlCommand(SqlHelper.CreateOutputTableCmd(outputTableName, pk.ColumnName, Operation.InsertOrUpdate));
                 }
 
                 //Copy data from temporary table to destination table.
                 var mergeCommand = context.BuildMergeCommand(tmpTableName, Operation.InsertOrUpdate);
-                if (options.HasFlag(BulkOptions.OutputIdentity))
+                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
                 {
-                    mergeCommand += SqlHelper.BuildOutputId(outputTableName,
-                        context.EntityMapping.Pks.First().ColumnName);
+                    mergeCommand += SqlHelper.BuildOutputId(outputTableName, pk.ColumnName);
                 }
-                mergeCommand += $";{SqlHelper.GetDropTableCommand(tmpTableName)}";
+                mergeCommand += SqlHelper.GetDropTableCommand(tmpTableName);
                 var affectedRows = context.ExecuteSqlCommand(mergeCommand);
 
-                if (options.HasFlag(BulkOptions.OutputIdentity))
+                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
                 {
-                    context.LoadFromTmpOutputTable(outputTableName, context.EntityMapping.Pks.First(), entityList,
-                        Operation.InsertOrUpdate);
+                    context.LoadFromTmpOutputTable(outputTableName, pk, entityList);
                 }
 
                 //Commit if internal transaction exists.

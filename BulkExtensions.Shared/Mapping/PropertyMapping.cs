@@ -7,5 +7,6 @@
         public bool IsPk { get; set; }
         public bool IsFk { get; set; }
         public bool IsHierarchyMapping { get; set; }
+        public bool IsStoreGenerated { get; set; }
     }
 }

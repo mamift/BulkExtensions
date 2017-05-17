@@ -7,6 +7,8 @@ namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal class DbContextWrapper : IDbContextWrapper
     {
+        private const int Timeout = 60;
+
         internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping)
         {
             Connection = connection;
@@ -27,7 +29,7 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         {
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
-            sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandTimeout = Timeout;
             sqlCommand.CommandText = command;
 
             return sqlCommand.ExecuteNonQuery();
@@ -38,7 +40,7 @@ namespace EntityFramework.BulkExtensions.Commons.Context
             var list = new List<T>();
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
-            sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandTimeout = Timeout;
             sqlCommand.CommandText = command;
 
             using (var reader = sqlCommand.ExecuteReader())
@@ -58,7 +60,7 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         {
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
-            sqlCommand.CommandTimeout = Connection.ConnectionTimeout;
+            sqlCommand.CommandTimeout = Timeout;
             sqlCommand.CommandText = command;
 
             return sqlCommand.ExecuteReader();

@@ -7,7 +7,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 
-namespace Shared.Helpers
+namespace EntityFramework.BulkExtensions.Commons.Helpers
 {
     internal class EnumerableDataReader : DbDataReader
     {

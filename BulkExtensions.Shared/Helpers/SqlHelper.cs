@@ -43,7 +43,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                 .Select(column => $"{Source}.[{column.ColumnName}]")
                 .ToList();
 
-            if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
+            if (options.HasFlag(BulkOptions.OutputIdentity) && mapping.HasStoreGeneratedKey)
             {
                 paramList.Add($"1 as [{Identity}]");
             }
@@ -62,50 +62,24 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             switch (operationType)
             {
+                case Operation.Insert:
+                    command += context.EntityMapping.BuildMergeInsertSet();
+                    break;
                 case Operation.Update:
                     command += context.EntityMapping.BuildMergeUpdateSet();
-                    command += $";{GetDropTableCommand(tmpTableName)}";
+                    command += GetDropTableCommand(tmpTableName);
                     break;
                 case Operation.InsertOrUpdate:
                     command += context.EntityMapping.BuildMergeUpdateSet();
-                    command += operationType == Operation.InsertOrUpdate
-                        ? context.EntityMapping.BuildMergeInsertSet()
-                        : string.Empty;
+                    command += context.EntityMapping.BuildMergeInsertSet();
                     break;
                 case Operation.Delete:
                     command += "WHEN MATCHED THEN DELETE";
-                    command += $";{GetDropTableCommand(tmpTableName)}";
+                    command += GetDropTableCommand(tmpTableName);
                     break;
             }
 
             return command;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="mapping"></param>
-        /// <param name="outputTableName"></param>
-        /// <param name="tmpTableName"></param>
-        /// <param name="identityColumn"></param>
-        /// <param name="operationType"></param>
-        /// <returns></returns>
-        internal static string GetInsertIntoStagingTableCmd(this IEntityMapping mapping, string outputTableName,
-            string tmpTableName, string identityColumn, Operation operationType)
-        {
-            var columns = mapping.Properties
-                .FilterPropertiesByOperation(operationType)
-                .Select(propertyMapping => propertyMapping.ColumnName)
-                .ToList();
-
-            var comm = CreateOutputTableCmd(outputTableName, identityColumn, operationType)
-                       + BuildInsertIntoSet(columns, identityColumn, mapping.FullTableName)
-                       + $"OUTPUT INSERTED.{identityColumn} INTO "
-                       + outputTableName + $"([{identityColumn}]) "
-                       + BuildSelectSet(columns, identityColumn)
-                       + $" FROM {tmpTableName} AS {Source}; "
-                       + GetDropTableCommand(tmpTableName);
-
-            return comm;
         }
 
         /// <summary>
@@ -117,41 +91,20 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <param name="items"></param>
         /// <param name="operation"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this IDbContextWrapper context, string outputTableName,
-            IPropertyMapping propertyMapping, IList<TEntity> items, Operation operation)
+            IPropertyMapping propertyMapping, IList<TEntity> items)
         {
-            var command = operation == Operation.Insert
-                ? $"SELECT {propertyMapping.ColumnName} FROM {outputTableName} ORDER BY {propertyMapping.ColumnName};"
-                : $"SELECT {Identity}, {propertyMapping.ColumnName} FROM {outputTableName}";
+            var command = $"SELECT {Identity}, {propertyMapping.ColumnName} FROM {outputTableName}";
 
-            if (operation == Operation.InsertOrUpdate)
+            using (var reader = context.SqlQuery(command))
             {
-                using (var reader = context.SqlQuery(command))
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        var item = items.ElementAt((int)reader[0]);
+                    var item = items.ElementAt((int)reader[Identity]);
 
-                        var property = item.GetType().GetProperty(propertyMapping.PropertyName);
-
-                        if (property != null && property.CanWrite)
-                            property.SetValue(item, reader[1], null);
-
-                        else
-                            throw new Exception();
-                    }
-                }
-            }
-
-            else if (operation == Operation.Insert)
-            {
-                var identities = context.SqlQuery<int>(command).ToList();
-                foreach (var result in identities)
-                {
-                    var index = identities.IndexOf(result);
-                    var property = items[index].GetType().GetProperty(propertyMapping.PropertyName);
+                    var property = item.GetType().GetProperty(propertyMapping.PropertyName);
 
                     if (property != null && property.CanWrite)
-                        property.SetValue(items[index], result, null);
+                        property.SetValue(item, reader[propertyMapping.ColumnName], null);
 
                     else
                         throw new Exception();
@@ -169,7 +122,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <returns></returns>
         internal static string GetDropTableCommand(string tableName)
         {
-            return $"DROP TABLE {tableName};";
+            return $"; DROP TABLE {tableName};";
         }
 
         /// <summary>
@@ -205,11 +158,10 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             foreach (var column in mapping.Properties)
             {
-                if (!column.IsPk)
-                {
-                    columns.Add($"[{column.ColumnName}]");
-                    values.Add($"[{Source}].[{column.ColumnName}]");
-                }
+                if (column.IsStoreGenerated) continue;
+
+                columns.Add($"[{column.ColumnName}]");
+                values.Add($"[{Source}].[{column.ColumnName}]");
             }
 
             command.Append(string.Join(", ", columns));
@@ -222,7 +174,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         internal static string BuildOutputId(string outputTableName, string identityColumn)
         {
-            return $"OUTPUT {Source}.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
+            return $" OUTPUT {Source}.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
         }
 
         /// <summary>
@@ -246,48 +198,9 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        private static string BuildSelectSet(IEnumerable<string> columns, string identityColumn)
-        {
-            var command = new StringBuilder();
-            var selectColumns = new List<string>();
-
-            command.Append("SELECT ");
-
-            foreach (var column in columns)
-            {
-                if ((identityColumn == null || column == identityColumn) && identityColumn != null) continue;
-                selectColumns.Add($"[{Source}].[{column}]");
-            }
-
-            command.Append(string.Join(", ", selectColumns));
-
-            return command.ToString();
-        }
-
-        private static string BuildInsertIntoSet(IEnumerable<string> columns, string identityColumn, string tableName)
-        {
-            var command = new StringBuilder();
-            var insertColumns = new List<string>();
-
-            command.Append("INSERT INTO ");
-            command.Append(tableName);
-            command.Append(" (");
-
-            foreach (var column in columns)
-                if (column != identityColumn)
-                    insertColumns.Add($"[{column}]");
-
-            command.Append(string.Join(", ", insertColumns));
-            command.Append(") ");
-
-            return command.ToString();
-        }
-
         internal static string CreateOutputTableCmd(string tmpTablename, string identityColumn, Operation operationType)
         {
-            return operationType == Operation.InsertOrUpdate
-                ? $"CREATE TABLE {tmpTablename} ([{Identity}] int, [{identityColumn}] int)"
-                : $"CREATE TABLE {tmpTablename} ([{identityColumn}] int); ";
+            return $"CREATE TABLE {tmpTablename} ([{Identity}] int, [{identityColumn}] int);";
         }
     }
 }

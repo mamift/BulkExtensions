@@ -19,14 +19,5 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                     return propertyMappings;
             }
         }
-
-        internal static IEnumerable<IPropertyMapping> FilterPropertiesByOptions(this IEnumerable<IPropertyMapping> propertyMappings, BulkOptions options)
-        {
-            if (!options.HasFlag(BulkOptions.KeepForeingKeys))
-            {
-                return propertyMappings.Where(property => !property.IsFk);
-            }
-            return propertyMappings;
-        }
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Commons.Mapping;
-using Shared.Helpers;
 
 namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
@@ -13,10 +15,11 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         internal static EnumerableDataReader ToDataReader<TEntity>(this IList<TEntity> entities, IEntityMapping mapping,
             Operation operationType, BulkOptions options) where TEntity : class
         {
+            var rows = new ConcurrentBag<object[]>();
             var tableColumns = mapping.Properties
                 .FilterPropertiesByOperation(operationType)
                 .ToList();
-            if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
+            if (options.HasFlag(BulkOptions.OutputIdentity) && mapping.HasStoreGeneratedKey)
             {
                 tableColumns.Add(new PropertyMapping
                 {
@@ -24,10 +27,8 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                     PropertyName = SqlHelper.Identity
                 });
             }
-                
-            var rows = new List<object[]>();
 
-            foreach (var item in entities)
+            Parallel.ForEach(entities, (item, state, index) =>
             {
                 var props = item.GetType()
                     .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
@@ -36,17 +37,19 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                 {
                     var prop = props.SingleOrDefault(info => info.Name == column.PropertyName);
                     if (prop != null)
-                        row.Add(prop.GetValue(item, null));
+                    {
+                        row.Add(prop.GetValue(item, null) ?? DBNull.Value);
+                    }
                     else if (column.IsHierarchyMapping)
                         row.Add(mapping.HierarchyMapping[item.GetType().Name]);
                     else if (column.PropertyName.Equals(SqlHelper.Identity))
-                        row.Add(entities.IndexOf(item));
+                        row.Add(index);
                     else
-                        row.Add(null);
+                        row.Add(DBNull.Value);
                 }
 
                 rows.Add(row.ToArray());
-            }
+            });
 
             return new EnumerableDataReader(tableColumns.Select(propertyMapping => propertyMapping.ColumnName), rows);
         }

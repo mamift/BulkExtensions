@@ -12,6 +12,8 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
 
         string FullTableName { get; }
 
+        bool HasStoreGeneratedKey { get; }
+
         Dictionary<string, string> HierarchyMapping { get; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityFramework.BulkExtensions.Commons.Mapping
@@ -17,5 +18,7 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
         public string FullTableName => Schema != null ? $"[{Schema}].[{TableName}]" : $"[{TableName}]";
 
         public Dictionary<string, string> HierarchyMapping { get; set; }
+
+        public bool HasStoreGeneratedKey => Properties.Any(property => property.IsPk && property.IsStoreGenerated);
     }
 }

@@ -16,7 +16,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             var properties = context.EntityMapping.Properties
                 .FilterPropertiesByOperation(operationType)
                 .ToList();
-            if (operationType == Operation.InsertOrUpdate && options.HasFlag(BulkOptions.OutputIdentity))
+            if (options.HasFlag(BulkOptions.OutputIdentity) && context.EntityMapping.HasStoreGeneratedKey)
             {
                 properties.Add(new PropertyMapping
                 {
@@ -34,6 +34,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                     bulkcopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
                 }
 
+                bulkcopy.BatchSize = 5000;
                 bulkcopy.DestinationTableName = tableName;
                 bulkcopy.BulkCopyTimeout = context.Connection.ConnectionTimeout;
                 bulkcopy.WriteToServer(dataReader);

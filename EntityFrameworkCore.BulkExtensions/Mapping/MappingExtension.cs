@@ -23,7 +23,9 @@ namespace EntityFramework.BulkExtensions.Mapping
 
             var relational = entityType.Relational();
             var baseType = entityType.BaseType ?? entityType;
-            var hierarchy = context.Model.GetEntityTypes().Where(type => type.BaseType == null ? type == baseType : type.BaseType == baseType).ToList();
+            var hierarchy = context.Model.GetEntityTypes()
+                .Where(type => type.BaseType == null ? type == baseType : type.BaseType == baseType)
+                .ToList();
             var properties = hierarchy.GetPropertyMappings().ToList();
 
             var entityMapping = new EntityMapping
@@ -32,7 +34,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 Schema = relational.Schema
             };
 
-            if (hierarchy.Any())
+            if (hierarchy.Count > 1)
             {
                 entityMapping.HierarchyMapping = GetHierarchyMappings(hierarchy);
                 properties.Add(new PropertyMapping
@@ -48,37 +50,24 @@ namespace EntityFramework.BulkExtensions.Mapping
 
         private static Dictionary<string, string> GetHierarchyMappings(IEnumerable<IEntityType> hierarchy)
         {
-            var hierarchyMapping = new Dictionary<string, string>();
-            foreach (var entityType in hierarchy)
-            {
-                hierarchyMapping.Add(entityType.ClrType.Name, entityType.Relational().DiscriminatorValue.ToString());
-            }
-            return hierarchyMapping;
+            return hierarchy.ToDictionary(entityType => entityType.ClrType.Name,
+                entityType => entityType.Relational().DiscriminatorValue.ToString());
         }
 
         private static IEnumerable<IPropertyMapping> GetPropertyMappings(this IEnumerable<IEntityType> hierarchy)
         {
-            var properties = hierarchy
+            return hierarchy
                 .SelectMany(type => type.GetProperties().Where(property => !property.IsShadowProperty))
                 .Distinct()
-                .ToList();
-
-            var propertyMappings = new List<IPropertyMapping>();
-            properties
-            .ForEach(property =>
+                .ToList()
+                .Select(property => new PropertyMapping
                 {
-                    var prop = new PropertyMapping
-                    {
-                        PropertyName = property.Name,
-                        ColumnName = property.Relational().ColumnName,
-                        IsPk = property.IsPrimaryKey(),
-                        IsFk = property.IsForeignKey()
-                    };
-
-                    propertyMappings.Add(prop);
+                    PropertyName = property.Name,
+                    ColumnName = property.Relational().ColumnName,
+                    IsPk = property.IsPrimaryKey(),
+                    IsFk = property.IsForeignKey(),
+                    IsStoreGenerated = property.RequiresValueGenerator
                 });
-
-            return propertyMappings;
         }
     }
 }

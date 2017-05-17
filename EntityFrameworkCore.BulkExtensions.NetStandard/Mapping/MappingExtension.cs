@@ -34,7 +34,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 Schema = relational.Schema
             };
 
-            if (hierarchy.Any())
+            if (hierarchy.Count > 1)
             {
                 entityMapping.HierarchyMapping = GetHierarchyMappings(hierarchy);
                 properties.Add(new PropertyMapping
@@ -65,7 +65,8 @@ namespace EntityFramework.BulkExtensions.Mapping
                     PropertyName = property.Name,
                     ColumnName = property.Relational().ColumnName,
                     IsPk = property.IsPrimaryKey(),
-                    IsFk = property.IsForeignKey()
+                    IsFk = property.IsForeignKey(),
+                    IsStoreGenerated = property.RequiresValueGenerator
                 });
         }
     }
