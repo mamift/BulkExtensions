@@ -11,6 +11,7 @@ It works as extension methods of the DbContext class and is very simple to use. 
 - Support context transaction (Uses the same connection and transaction of the context);
 - If the context has no transaction it creates and uses an internal one for safety;
 - Output database generated Ids;
+- Support Table-Per-Hierarchy(TPH);
 
 #### Framework Targets
 
