@@ -218,7 +218,7 @@ catch
 }
 
 /* The two operations will run on the same transaction, if something goes worng the rollback would
-undo the changes made by the two bulk operations.
+undo the changes made by the two bulk operations.*/
 ```
 
 If you are not using transaction, each bulk operations creates a transaction for the scope of the operation.
@@ -250,7 +250,7 @@ var deleteList = context.Set<MyEntity>()
 context.BulkDelete(deleteList); 
 
 /* Each operations will run on it's own transaction. For example, if something goes worng with the delete
-operation the changes made by it would be undone but the changes made by the update before would persist.
+operation the changes made by it would be undone but the changes made by the update before would persist.*/
 ```
 
 ## Credits
