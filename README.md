@@ -1,6 +1,6 @@
 # BulkExtensions
 
-   This project was built as an extension to add bulk operations functionality to the Entity Framework. 
+   This project was built as an extension to add bulk operations functionality to the Entity Framework (EF6 and EFCore). 
 It works as extension methods of the DbContext class and is very simple to use. The library uses the same connection your context created and if the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
 <br><br>
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
