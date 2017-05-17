@@ -249,8 +249,9 @@ var deleteList = context.Set<MyEntity>()
 //Bulk delete extension method
 context.BulkDelete(deleteList); 
 
-/* Each operations will run on it's own transaction. For example, if something goes worng with the delete
-operation the changes made by it would be undone but the changes made by the update before would persist.*/
+/* Each operations will run on it's own transaction. For example, if something 
+goes worng with the delete operation the changes made by it would be undone but 
+the changes made by the update before would persist.*/
 ```
 
 ## Credits
