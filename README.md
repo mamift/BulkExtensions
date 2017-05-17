@@ -181,34 +181,40 @@ The work with transactions is pretty straightforward and flexible. If you are pe
 
 ```c#
 using EntityFramework.BulkExtensions
-
-//Begin a transaction on your context.
-var transaction = context.Database.BeginTransaction();
-var rnd = new Random();
-
-//Read some entities from database.
-var updateList = context.Set<MyEntity>()
-   .Where(entity => entity.Owner == "Steve")
-   .ToList();
-foreach(var entity in updateList) 
+try
 {
-    //Replace the old value with some random new value.
-    entity.Value = rnd.Next(1000); 
+   //Begin a transaction on your context.
+   var transaction = context.Database.BeginTransaction();
+   var rnd = new Random();
+
+   //Read some entities from database.
+   var updateList = context.Set<MyEntity>()
+      .Where(entity => entity.Owner == "Steve")
+      .ToList();
+   foreach(var entity in updateList) 
+   {
+       //Replace the old value with some random new value.
+       entity.Value = rnd.Next(1000); 
+   }
+
+   //Bulk update extension method
+   context.BulkUpdate(updateList);
+
+   //Read other entities from database.
+   var deleteList = context.Set<MyEntity>()
+         .Where(entity => entity.Owner == "Bob")
+         .toList();
+
+   //Bulk delete extension method
+   context.BulkDelete(deleteList); 
+
+   //Commit the transaction
+   transaction.Commit();
 }
-
-//Bulk update extension method
-context.BulkUpdate(updateList);
-
-//Read other entities from database.
-var deleteList = context.Set<MyEntity>()
-      .Where(entity => entity.Owner == "Bob")
-      .toList();
-
-//Bulk delete extension method
-context.BulkDelete(deleteList); 
-
-//Commit the transaction
-transaction.Commit();
+catch
+{
+   transaction.Rollback();
+}
 
 /* The two operations will run on the same transaction, if something goes worng the rollback would
 undo the changes made by the two bulk operations.
