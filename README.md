@@ -1,6 +1,6 @@
 # BulkExtensions
 
-   This project was built as an extension to add bulk operations functionality to the Entity Framework. 
+   This project was built as an extension to add bulk operations functionality to the Entity Framework (EF6 and EFCore). 
 It works as extension methods of the DbContext class and is very simple to use. The library uses the same connection your context created and if the context's database have a CurrentTransaction it will use it, otherwise it creates an internal one for the scope of the operation.
 <br><br>
    It relies on the SqlBulkCopy class to perform all the operations, because of that, it can't handle navigation properties and will not persist relationships between entities, but there is a workaround for that if the foreign keys are being explicitly mapped in your model classes. See the workaround in the examples below.
@@ -8,9 +8,11 @@ It works as extension methods of the DbContext class and is very simple to use. 
 ### Overall features
 
 - Bulk insert, update, insert or update, delete operations;
-- Uses the same connection and transaction of the context;
+- Support context transaction (Uses the same connection and transaction of the context);
 - If the context has no transaction it creates and uses an internal one for safety;
+- Support tables with AutoIncrement key, not auto increment keys and composite keys;
 - Output database generated Ids;
+- Support Table-Per-Hierarchy(TPH);
 
 #### Framework Targets
 
@@ -21,6 +23,7 @@ It works as extension methods of the DbContext class and is very simple to use. 
    
 - Added support for EFCore;
 - New feature InsertOrUpdate;
+- Support composite keys;
    
 ### Installation
 You can install it using the nuget package for your EF version:
@@ -174,6 +177,84 @@ context.BulkDelete(entityList);
 
 /* This operation will delete all the entities in the list from the database. */
 ```
+
+### Transactions
+The work with transactions is pretty straightforward and flexible. If you are performing multiple operations on the context using a transaction it is safe to use any bulk operation, the operations use the transaction of the context to perform database manipulation.
+
+```c#
+using EntityFramework.BulkExtensions
+try
+{
+   //Begin a transaction on your context.
+   var transaction = context.Database.BeginTransaction();
+   var rnd = new Random();
+
+   //Read some entities from database.
+   var updateList = context.Set<MyEntity>()
+      .Where(entity => entity.Owner == "Steve")
+      .ToList();
+   foreach(var entity in updateList) 
+   {
+       //Replace the old value with some random new value.
+       entity.Value = rnd.Next(1000); 
+   }
+
+   //Bulk update extension method
+   context.BulkUpdate(updateList);
+
+   //Read other entities from database.
+   var deleteList = context.Set<MyEntity>()
+         .Where(entity => entity.Owner == "Bob")
+         .toList();
+
+   //Bulk delete extension method
+   context.BulkDelete(deleteList); 
+
+   //Commit the transaction
+   transaction.Commit();
+}
+catch
+{
+   transaction.Rollback();
+}
+
+/* The two operations will run on the same transaction, if something goes worng the rollback would
+undo the changes made by the two bulk operations.*/
+```
+
+If you are not using transaction, each bulk operations creates a transaction for the scope of the operation.
+
+```c#
+using EntityFramework.BulkExtensions
+
+var rnd = new Random();
+
+//Read some entities from database.
+var updateList = context.Set<MyEntity>()
+   .Where(entity => entity.Owner == "Steve")
+   .ToList();
+foreach(var entity in updateList) 
+{
+    //Replace the old value with some random new value.
+    entity.Value = rnd.Next(1000); 
+}
+
+//Bulk update extension method
+context.BulkUpdate(updateList);
+
+//Read other entities from database.
+var deleteList = context.Set<MyEntity>()
+      .Where(entity => entity.Owner == "Bob")
+      .toList();
+
+//Bulk delete extension method
+context.BulkDelete(deleteList); 
+
+/* Each operations will run on it's own transaction. For example, if something 
+goes worng with the delete operation the changes made by it would be undone but 
+the changes made by the update before would persist.*/
+```
+
 ## Credits
 This library is based on the SqlBulkTools by Greg Taylor.
 
