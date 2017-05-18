@@ -10,6 +10,7 @@ It works as extension methods of the DbContext class and is very simple to use. 
 - Bulk insert, update, insert or update, delete operations;
 - Support context transaction (Uses the same connection and transaction of the context);
 - If the context has no transaction it creates and uses an internal one for safety;
+- Support tables with AutoIncrement key, not auto increment keys and composite keys;
 - Output database generated Ids;
 - Support Table-Per-Hierarchy(TPH);
 
