@@ -6,6 +6,8 @@ namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal interface IDbContextWrapper
     {
+        int Timeout { get; }
+        int BatchSize { get; }
         IDbConnection Connection { get; }
         IDbTransaction Transaction { get; }
         IEntityMapping EntityMapping { get; }

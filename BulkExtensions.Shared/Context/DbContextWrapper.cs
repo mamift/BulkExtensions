@@ -6,9 +6,7 @@ using EntityFramework.BulkExtensions.Commons.Mapping;
 namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal class DbContextWrapper : IDbContextWrapper
-    {
-        private const int Timeout = 60;
-
+    {                
         internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping)
         {
             Connection = connection;
@@ -25,23 +23,34 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         public IDbTransaction Transaction { get; }
         private bool IsInternalTransaction { get; }
 
+        private const int _timeout = 60;
+        public int Timeout
+        {
+            get
+            {
+                return _timeout;
+            }
+        }
+
+        private const int _batchSize = 5000;
+        public int BatchSize
+        {
+            get
+            {
+                return _batchSize;
+            }
+        }
+
         public int ExecuteSqlCommand(string command)
         {
-            var sqlCommand = Connection.CreateCommand();
-            sqlCommand.Transaction = Transaction;
-            sqlCommand.CommandTimeout = Timeout;
-            sqlCommand.CommandText = command;
-
+            var sqlCommand = CreateCommand(command);
             return sqlCommand.ExecuteNonQuery();
         }
 
         public IEnumerable<T> SqlQuery<T>(string command) where T : struct
         {
             var list = new List<T>();
-            var sqlCommand = Connection.CreateCommand();
-            sqlCommand.Transaction = Transaction;
-            sqlCommand.CommandTimeout = Timeout;
-            sqlCommand.CommandText = command;
+            var sqlCommand = CreateCommand(command);
 
             using (var reader = sqlCommand.ExecuteReader())
             {
@@ -54,28 +63,39 @@ namespace EntityFramework.BulkExtensions.Commons.Context
             }
 
             return list;
-        }
+        }       
 
         public IDataReader SqlQuery(string command)
+        {
+            var sqlCommand = CreateCommand(command);
+            return sqlCommand.ExecuteReader();
+        }
+
+        private IDbCommand CreateCommand(string command)
         {
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
             sqlCommand.CommandTimeout = Timeout;
             sqlCommand.CommandText = command;
-
-            return sqlCommand.ExecuteReader();
+            return sqlCommand;
         }
 
         public void Commit()
         {
             if (IsInternalTransaction)
+            {
                 Transaction.Commit();
+                Transaction.Dispose();
+            }
         }
 
         public void Rollback()
         {
             if (IsInternalTransaction)
+            {
                 Transaction.Rollback();
+                Transaction.Dispose();
+            }
         }
     }
 }

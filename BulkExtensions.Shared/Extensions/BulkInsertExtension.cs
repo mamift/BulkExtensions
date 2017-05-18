@@ -24,20 +24,19 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                     PropertyName = SqlHelper.Identity
                 });
             }
-            var dataReader = entities.ToDataReader(context.EntityMapping, operationType, options);
 
-            using (var bulkcopy = new SqlBulkCopy((SqlConnection) context.Connection, SqlBulkCopyOptions.Default,
-                (SqlTransaction) context.Transaction))
+            using (var bulkcopy = new SqlBulkCopy((SqlConnection)context.Connection, SqlBulkCopyOptions.Default,
+                (SqlTransaction)context.Transaction))
             {
                 foreach (var column in properties)
                 {
                     bulkcopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
                 }
 
-                bulkcopy.BatchSize = 5000;
+                bulkcopy.BatchSize = context.BatchSize;
                 bulkcopy.DestinationTableName = tableName;
-                bulkcopy.BulkCopyTimeout = context.Connection.ConnectionTimeout;
-                bulkcopy.WriteToServer(dataReader);
+                bulkcopy.BulkCopyTimeout = context.Timeout;
+                bulkcopy.WriteToServer(entities.ToDataReader(context.EntityMapping, properties));
             }
         }
     }
