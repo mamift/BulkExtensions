@@ -194,7 +194,8 @@ using(var transaction = context.Database.BeginTransaction())
    foreach(var entity in updateList) 
    {
        //Replace the old value with some random new value.
-       entity.Value = rnd.Next(1000); 
+       entity.Value = rnd.Next(1000);
+       entity.OtherProperty = "some random string";
    }
 
    //Bulk update extension method
@@ -231,6 +232,7 @@ foreach(var entity in updateList)
 {
     //Replace the old value with some random new value.
     entity.Value = rnd.Next(1000); 
+    entity.OtherProperty = "some random string";
 }
 
 //Bulk update extension method
