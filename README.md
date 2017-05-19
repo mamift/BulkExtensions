@@ -185,6 +185,7 @@ The work with transactions is pretty straightforward and flexible. If you are pe
 using EntityFramework.BulkExtensions
    //Begin a transaction on your context.
 using(var transaction = context.Database.BeginTransaction())
+{
    var rnd = new Random();
 
    //Read some entities from database.
