@@ -234,7 +234,7 @@ foreach(var entity in updateList)
 }
 
 //Bulk update extension method
-context.BulkUpdate(updateList);
+context.BulkUpdate(updateList); // 1st operation
 
 //Read other entities from database.
 var deleteList = context.Set<MyEntity>()
@@ -242,7 +242,7 @@ var deleteList = context.Set<MyEntity>()
       .toList();
 
 //Bulk delete extension method
-context.BulkDelete(deleteList); 
+context.BulkDelete(deleteList); // 2nd operation
 
 /* Each operations will run on it's own transaction. For example, if something 
 goes worng with the delete operation the changes made by it would be undone but 
