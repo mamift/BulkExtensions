@@ -183,10 +183,8 @@ The work with transactions is pretty straightforward and flexible. If you are pe
 
 ```c#
 using EntityFramework.BulkExtensions
-try
-{
    //Begin a transaction on your context.
-   var transaction = context.Database.BeginTransaction();
+using(var transaction = context.Database.BeginTransaction())
    var rnd = new Random();
 
    //Read some entities from database.
@@ -200,7 +198,7 @@ try
    }
 
    //Bulk update extension method
-   context.BulkUpdate(updateList);
+   context.BulkUpdate(updateList); // 1st operation
 
    //Read other entities from database.
    var deleteList = context.Set<MyEntity>()
@@ -208,14 +206,10 @@ try
          .toList();
 
    //Bulk delete extension method
-   context.BulkDelete(deleteList); 
+   context.BulkDelete(deleteList); // 2nd operation
 
    //Commit the transaction
    transaction.Commit();
-}
-catch
-{
-   transaction.Rollback();
 }
 
 /* The two operations will run on the same transaction, if something goes worng the rollback would
