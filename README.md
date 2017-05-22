@@ -27,8 +27,8 @@ It works as extension methods of the DbContext class and is very simple to use. 
    
 ### Installation
 You can install it using the nuget package for your EF version:
-- For EF6: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">EntityFramework.BulkExtensions</a><br>
-- For EFCore: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore">EntityFramework.BulkExtensions.EFCore</a><br>
+- For EF6: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">BulkExtensions</a><br>
+- For EFCore: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore">BulkExtensions.EFCore</a><br>
 
 ## How to use it
 You just need to call the methods bellow for the feature you want to use passing the collection of entities to perform the operation.
