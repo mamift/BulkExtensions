@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Concurrent;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
@@ -13,7 +12,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         internal static EnumerableDataReader ToDataReader<TEntity>(this IList<TEntity> entities, IEntityMapping mapping,
             IEnumerable<IPropertyMapping> tableColumns) where TEntity : class
         {
-            var rows = new ConcurrentBag<object[]>();
+            var rows = new List<object[]>();
 
             for(var index = 0; index < entities.Count; index++)
             {

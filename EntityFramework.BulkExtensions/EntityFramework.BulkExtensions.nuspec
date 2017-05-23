@@ -2,16 +2,16 @@
 <package >
   <metadata>
     <id>EntityFramework.BulkExtensions</id>
-    <version>1.3.1</version>
+    <version>1.3.4</version>
     <title>$title$</title>
     <authors>Tiago L. da Nóbrega</authors>
     <owners>tiagoln</owners>
     <licenseUrl>https://github.com/tiagoln/EntityFramework.BulkExtensions/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/tiagoln/EntityFramework.BulkExtensions</projectUrl>
+    <projectUrl>https://tiagoln.github.io/BulkExtensions/</projectUrl>
     <iconUrl>https://cdn3.iconfinder.com/data/icons/essential-rounded/66/Rounded-06-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Added Insert or Update feature.</releaseNotes>
+    <releaseNotes>Bug fixes.</releaseNotes>
     <copyright>Copyright 2017 Tiago L. da Nóbrega</copyright>
     <tags>EntityFramework bulk operations insert delete update merge extension</tags>
     <dependencies>
