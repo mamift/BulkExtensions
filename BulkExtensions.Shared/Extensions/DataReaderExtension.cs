@@ -16,18 +16,18 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         {
             var rows = new ConcurrentBag<object[]>();
 
-            Parallel.ForEach(entities, (item, state, index) =>
+            Parallel.ForEach(entities, (entity, state, index) =>
             {
-                var props = item.GetType()
+                var props = entity.GetType()
                     .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
                 var row = new List<object>();
                 foreach (var column in tableColumns)
                 {
                     var prop = props.SingleOrDefault(info => info.Name == column.PropertyName);
                     if (prop != null)
-                        row.Add(prop.GetValue(item, null) ?? DBNull.Value);
+                        row.Add(prop.GetValue(entity, null) ?? DBNull.Value);
                     else if (column.IsHierarchyMapping)
-                        row.Add(mapping.HierarchyMapping[item.GetType().Name]);
+                        row.Add(mapping.HierarchyMapping[entity.GetType().Name]);
                     else if (column.PropertyName.Equals(SqlHelper.Identity))
                         row.Add(index);
                     else

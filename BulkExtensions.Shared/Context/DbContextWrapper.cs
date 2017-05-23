@@ -23,23 +23,9 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         public IDbTransaction Transaction { get; }
         private bool IsInternalTransaction { get; }
 
-        private const int _timeout = 60;
-        public int Timeout
-        {
-            get
-            {
-                return _timeout;
-            }
-        }
+        public int Timeout { get; set; } = 60;
 
-        private const int _batchSize = 5000;
-        public int BatchSize
-        {
-            get
-            {
-                return _batchSize;
-            }
-        }
+        public int BatchSize { get; set; } = 5000;
 
         public int ExecuteSqlCommand(string command)
         {

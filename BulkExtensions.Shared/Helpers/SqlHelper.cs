@@ -25,7 +25,10 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <returns></returns>
         internal static string RandomTableName(this IEntityMapping mapping)
         {
-            return $"[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
+            var schema = string.IsNullOrEmpty(mapping.Schema?.Trim())
+                ? string.Empty
+                : $"[{mapping.Schema}].";
+            return $"{schema}[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
 
         /// <summary>
@@ -50,8 +53,8 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             var paramListConcatenated = string.Join(", ", paramList);
 
-            return $"SELECT TOP 0 {paramListConcatenated} INTO {tableName} FROM {mapping.TableName} AS A " +
-                   $"LEFT JOIN {mapping.TableName} AS {Source} ON 1 = 2";
+            return $"SELECT TOP 0 {paramListConcatenated} INTO {tableName} FROM {mapping.FullTableName} AS A " +
+                   $"LEFT JOIN {mapping.FullTableName} AS {Source} ON 1 = 2";
         }
 
         internal static string BuildMergeCommand(this IDbContextWrapper context, string tmpTableName,
@@ -89,7 +92,6 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <param name="outputTableName"></param>
         /// <param name="propertyMapping"></param>
         /// <param name="items"></param>
-        /// <param name="operation"></param>
         internal static void LoadFromTmpOutputTable<TEntity>(this IDbContextWrapper context, string outputTableName,
             IPropertyMapping propertyMapping, IList<TEntity> items)
         {
