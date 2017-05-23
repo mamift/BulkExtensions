@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Commons.Mapping;
@@ -16,8 +15,9 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         {
             var rows = new ConcurrentBag<object[]>();
 
-            Parallel.ForEach(entities, (entity, state, index) =>
+            for(var index = 0; index < entities.Count; index++)
             {
+                var entity = entities[index];
                 var props = entity.GetType()
                     .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
                 var row = new List<object>();
@@ -35,7 +35,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                 }
 
                 rows.Add(row.ToArray());
-            });
+            }
 
             return new EnumerableDataReader(tableColumns.Select(propertyMapping => propertyMapping.ColumnName), rows);
         }
