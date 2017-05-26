@@ -140,7 +140,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             foreach (var column in mapping.Properties)
             {
-                if (column.IsPk || column.IsHierarchyMapping) continue;
+                if (column.IsStoreGenerated || column.IsHierarchyMapping) continue;
 
                 parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
             }

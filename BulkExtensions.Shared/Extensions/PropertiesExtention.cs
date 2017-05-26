@@ -12,11 +12,18 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             switch (operationType)
             {
                 case Operation.Delete:
-                    return propertyMappings.Where(propertyMapping => propertyMapping.IsPk).ToList();
+                    return propertyMappings
+                        .Where(propertyMapping => propertyMapping.IsPk)
+                        .ToList();
                 case Operation.Update:
-                    return propertyMappings.Where(propertyMapping => !propertyMapping.IsHierarchyMapping).ToList();
+                    return propertyMappings
+                        .Where(propertyMapping => !propertyMapping.IsHierarchyMapping)
+                        .Where(propertyMapping => !propertyMapping.IsStoreGenerated)
+                        .ToList();
                 default:
-                    return propertyMappings;
+                    return propertyMappings
+                        .Where(propertyMapping => !propertyMapping.IsStoreGenerated)
+                        .ToList();
             }
         }
     }
