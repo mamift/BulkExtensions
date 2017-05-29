@@ -9,12 +9,10 @@ using EntityFramework.BulkExtensions.Commons.Helpers;
 namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 {
     /// <summary>
-    /// 
     /// </summary>
     internal class BulkInsertOrUpdate : IBulkOperation
     {
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="context"></param>
         /// <param name="collection"></param>
@@ -25,9 +23,7 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
             BulkOptions options)
         {
             var tmpTableName = context.EntityMapping.RandomTableName();
-            var outputTableName = options.HasFlag(BulkOptions.OutputIdentity)
-                ? context.EntityMapping.RandomTableName()
-                : string.Empty;
+            var willOutputGeneratedValues = context.EntityMapping.WillOutputGeneratedValues(options);
             var entityList = collection.ToList();
             if (!entityList.Any())
             {
@@ -36,30 +32,32 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 
             try
             {
-                var pk = context.EntityMapping.Pks.FirstOrDefault(pkey => pkey.IsStoreGenerated);
+                var outputTableName = willOutputGeneratedValues
+                    ? context.EntityMapping.RandomTableName()
+                    : string.Empty;
+                var generatedColumns = willOutputGeneratedValues
+                    ? context.EntityMapping.GetPropertiesByOptions(options).ToList()
+                    : null;
                 //Create temporary table.
-                context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, Operation.InsertOrUpdate, options));
+                context.ExecuteSqlCommand(context.EntityMapping.BuildStagingTableCommand(tmpTableName, Operation.InsertOrUpdate, options));
 
                 //Bulk inset data to temporary temporary table.
                 context.BulkInsertToTable(entityList, tmpTableName, Operation.InsertOrUpdate, options);
-
-                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
+                if (willOutputGeneratedValues)
                 {
-                    context.ExecuteSqlCommand(SqlHelper.CreateOutputTableCmd(outputTableName, pk.ColumnName, Operation.InsertOrUpdate));
+                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, context.EntityMapping, generatedColumns));
                 }
 
                 //Copy data from temporary table to destination table.
                 var mergeCommand = context.BuildMergeCommand(tmpTableName, Operation.InsertOrUpdate);
-                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
-                {
-                    mergeCommand += SqlHelper.BuildOutputId(outputTableName, pk.ColumnName);
-                }
+                mergeCommand += willOutputGeneratedValues ? SqlHelper.BuildOutputValues(outputTableName, generatedColumns) : string.Empty;
                 mergeCommand += SqlHelper.GetDropTableCommand(tmpTableName);
                 var affectedRows = context.ExecuteSqlCommand(mergeCommand);
 
-                if (options.HasFlag(BulkOptions.OutputIdentity) && pk != null)
+                if (willOutputGeneratedValues)
                 {
-                    context.LoadFromTmpOutputTable(outputTableName, pk, entityList);
+                    //Load generated values from temporary output table into the entities.
+                    context.LoadFromOutputTable(outputTableName, generatedColumns, entityList);
                 }
 
                 //Commit if internal transaction exists.

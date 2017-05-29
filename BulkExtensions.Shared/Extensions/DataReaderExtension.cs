@@ -14,20 +14,21 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         {
             var rows = new List<object[]>();
 
+            var propertyMappings = tableColumns as IList<IPropertyMapping> ?? tableColumns.ToList();
             for(var index = 0; index < entities.Count; index++)
             {
                 var entity = entities[index];
-                var props = entity.GetType()
+                var properties = entity.GetType()
                     .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
                 var row = new List<object>();
-                foreach (var column in tableColumns)
+                foreach (var propertyMapping in propertyMappings)
                 {
-                    var prop = props.SingleOrDefault(info => info.Name == column.PropertyName);
-                    if (prop != null)
-                        row.Add(prop.GetValue(entity, null) ?? DBNull.Value);
-                    else if (column.IsHierarchyMapping)
+                    var propertyInfo = properties.SingleOrDefault(info => info.Name == propertyMapping.PropertyName);
+                    if (propertyInfo != null)
+                        row.Add(propertyInfo.GetValue(entity, null) ?? DBNull.Value);
+                    else if (propertyMapping.IsHierarchyMapping)
                         row.Add(mapping.HierarchyMapping[entity.GetType().Name]);
-                    else if (column.PropertyName.Equals(SqlHelper.Identity))
+                    else if (propertyMapping.PropertyName.Equals(SqlHelper.Identity))
                         row.Add(index);
                     else
                         row.Add(DBNull.Value);
@@ -36,7 +37,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                 rows.Add(row.ToArray());
             }
 
-            return new EnumerableDataReader(tableColumns.Select(propertyMapping => propertyMapping.ColumnName), rows);
+            return new EnumerableDataReader(propertyMappings.Select(propertyMapping => propertyMapping.ColumnName), rows);
         }
     }
 }

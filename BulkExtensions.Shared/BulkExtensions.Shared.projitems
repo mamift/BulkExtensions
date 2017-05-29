@@ -19,7 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Context\IDbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkInsertExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DataReaderExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\PropertiesExtention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MappingExtention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\BulkException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Flags\InsertOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Flags\UpdateOptions.cs" />

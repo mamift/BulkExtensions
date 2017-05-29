@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
 namespace EntityFramework.BulkExtensions.Commons.Context
@@ -13,8 +12,6 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         IEntityMapping EntityMapping { get; }
 
         int ExecuteSqlCommand(string command);
-
-        IEnumerable<T> SqlQuery<T>(string command) where T : struct;
 
         IDataReader SqlQuery(string command);
 

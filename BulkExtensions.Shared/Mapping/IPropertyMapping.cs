@@ -7,6 +7,6 @@
         bool IsPk { get; }
         bool IsFk { get; }
         bool IsHierarchyMapping { get; }
-        bool IsStoreGenerated { get; }
+        bool IsDbGenerated { get; }
     }
 }

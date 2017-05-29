@@ -13,10 +13,10 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         internal static void BulkInsertToTable<TEntity>(this IDbContextWrapper context, IList<TEntity> entities,
             string tableName, Operation operationType, BulkOptions options) where TEntity : class
         {
-            var properties = context.EntityMapping.Properties
-                .FilterPropertiesByOperation(operationType)
+            var properties = context.EntityMapping
+                .GetPropertiesByOperation(operationType)
                 .ToList();
-            if (options.HasFlag(BulkOptions.OutputIdentity) && context.EntityMapping.HasStoreGeneratedKey)
+            if (context.EntityMapping.WillOutputGeneratedValues(options))
             {
                 properties.Add(new PropertyMapping
                 {

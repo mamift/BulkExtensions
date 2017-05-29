@@ -38,15 +38,15 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <param name="operationType"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        internal static string CreateTempTable(this IEntityMapping mapping, string tableName, Operation operationType,
+        internal static string BuildStagingTableCommand(this IEntityMapping mapping, string tableName, Operation operationType,
             BulkOptions options)
         {
-            var paramList = mapping.Properties
-                .FilterPropertiesByOperation(operationType)
+            var paramList = mapping
+                .GetPropertiesByOperation(operationType)
                 .Select(column => $"{Source}.[{column.ColumnName}]")
                 .ToList();
 
-            if (options.HasFlag(BulkOptions.OutputIdentity) && mapping.HasStoreGeneratedKey)
+            if (mapping.WillOutputGeneratedValues(options))
             {
                 paramList.Add($"1 as [{Identity}]");
             }
@@ -90,12 +90,14 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <param name="outputTableName"></param>
-        /// <param name="propertyMapping"></param>
+        /// <param name="propertyMappings"></param>
         /// <param name="items"></param>
-        internal static void LoadFromTmpOutputTable<TEntity>(this IDbContextWrapper context, string outputTableName,
-            IPropertyMapping propertyMapping, IList<TEntity> items)
+        internal static void LoadFromOutputTable<TEntity>(this IDbContextWrapper context, string outputTableName,
+            IEnumerable<IPropertyMapping> propertyMappings, IList<TEntity> items)
         {
-            var command = $"SELECT {Identity}, {propertyMapping.ColumnName} FROM {outputTableName}";
+            var mappings = propertyMappings as IList<IPropertyMapping> ?? propertyMappings.ToList();
+            var columnNames = mappings.Select(property => property.ColumnName);
+            var command = $"SELECT {Identity}, {string.Join(", ", columnNames)} FROM {outputTableName}";
 
             using (var reader = context.SqlQuery(command))
             {
@@ -103,13 +105,16 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                 {
                     var item = items.ElementAt((int)reader[Identity]);
 
-                    var property = item.GetType().GetProperty(propertyMapping.PropertyName);
+                    foreach (var propertyMapping in mappings)
+                    {
+                        var propertyInfo = item.GetType().GetProperty(propertyMapping.PropertyName);
 
-                    if (property != null && property.CanWrite)
-                        property.SetValue(item, reader[propertyMapping.ColumnName], null);
+                        if (propertyInfo != null && propertyInfo.CanWrite)
+                            propertyInfo.SetValue(item, reader[propertyMapping.ColumnName], null);
 
-                    else
-                        throw new Exception();
+                        else
+                            throw new Exception();
+                    }
                 }
             }
 
@@ -140,7 +145,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             foreach (var column in mapping.Properties)
             {
-                if (column.IsStoreGenerated || column.IsHierarchyMapping) continue;
+                if (column.IsDbGenerated || column.IsHierarchyMapping) continue;
 
                 parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
             }
@@ -160,7 +165,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
             foreach (var column in mapping.Properties)
             {
-                if (column.IsStoreGenerated) continue;
+                if (column.IsDbGenerated) continue;
 
                 columns.Add($"[{column.ColumnName}]");
                 values.Add($"[{Source}].[{column.ColumnName}]");
@@ -174,9 +179,13 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        internal static string BuildOutputId(string outputTableName, string identityColumn)
+        internal static string BuildOutputValues(string outputTableName, IEnumerable<IPropertyMapping> properties)
         {
-            return $" OUTPUT {Source}.{Identity}, INSERTED.{identityColumn} INTO {outputTableName} ({Identity}, {identityColumn})";
+            var propertyMappings = properties as IList<IPropertyMapping> ?? properties.ToList();
+            var insertedColumns = string.Join(", ", propertyMappings.Select(property => $"INSERTED.{property.ColumnName}"));
+            var outputColumns = string.Join(", ", propertyMappings.Select(property => property.ColumnName));
+
+            return $" OUTPUT {Source}.{Identity}, {insertedColumns} INTO {outputTableName} ({Identity}, {outputColumns})";
         }
 
         /// <summary>
@@ -200,9 +209,11 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        internal static string CreateOutputTableCmd(string tmpTablename, string identityColumn, Operation operationType)
+        internal static string BuildOutputTableCommand(string tmpTablename, IEntityMapping mapping, IEnumerable<IPropertyMapping> propertyMappings)
         {
-            return $"CREATE TABLE {tmpTablename} ([{Identity}] int, [{identityColumn}] int);";
+            return $"SELECT TOP 0 1 as [{Identity}], {string.Join(", ", propertyMappings.Select(property => $"{Source}.[{property.ColumnName}]"))} " +
+                   $"INTO {tmpTablename} FROM {mapping.FullTableName} AS A " +
+                   $"LEFT JOIN {mapping.FullTableName} AS {Source} ON 1 = 2";
         }
     }
 }

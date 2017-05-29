@@ -7,7 +7,7 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
     {
         public string TableName { get; set; }
         public string Schema { get; set; }
-        public IEnumerable<IPropertyMapping> Properties { get; set; }
+        public IEnumerable<IPropertyMapping> Properties { get; set; }        
         public Dictionary<string, string> HierarchyMapping { get; set; }
 
         public IEnumerable<IPropertyMapping> Pks
@@ -19,6 +19,8 @@ namespace EntityFramework.BulkExtensions.Commons.Mapping
             ? $"[{TableName}]"
             : $"[{Schema}].[{TableName}]";
         
-        public bool HasStoreGeneratedKey => Properties.Any(property => property.IsPk && property.IsStoreGenerated);
+        public bool HasGeneratedKeys => Properties.Any(property => property.IsPk && property.IsDbGenerated);
+
+        public bool HasComputedColumns => Properties.Any(property => !property.IsPk && property.IsDbGenerated);
     }
 }

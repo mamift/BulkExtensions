@@ -110,7 +110,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                     PropertyName = propertyMapping.Property.Name,
                     IsPk = ((EntityType) propertyMapping.Column.DeclaringType).KeyProperties
                         .Any(property => property.Name.Equals(propertyMapping.Column.Name)),
-                    IsStoreGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
+                    IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
                     || propertyMapping.Column.IsStoreGeneratedComputed
                 });
 

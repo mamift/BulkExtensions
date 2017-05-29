@@ -30,29 +30,29 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
             try
             {
                 //Return generated IDs for bulk inserted elements.
-                if (options.HasFlag(BulkOptions.OutputIdentity) && context.EntityMapping.HasStoreGeneratedKey)
+                if (context.EntityMapping.WillOutputGeneratedValues(options))
                 {
-                    var pk = context.EntityMapping.Pks.First(pkey => pkey.IsStoreGenerated);
+                    var generatedColumns = context.EntityMapping.GetPropertiesByOptions(options).ToList();
 
                     //Create temporary table.
                     var tmpTableName = context.EntityMapping.RandomTableName();
-                    context.ExecuteSqlCommand(context.EntityMapping.CreateTempTable(tmpTableName, Operation.Insert, options));
+                    context.ExecuteSqlCommand(context.EntityMapping.BuildStagingTableCommand(tmpTableName, Operation.Insert, options));
 
                     //Bulk inset data to temporary temporary table.
-                    context.BulkInsertToTable(entityList, tmpTableName, Operation.Insert, options);                    
+                    context.BulkInsertToTable(entityList, tmpTableName, Operation.Insert, options);
 
                     //Create output table
                     var outputTableName = context.EntityMapping.RandomTableName();
-                    context.ExecuteSqlCommand(SqlHelper.CreateOutputTableCmd(outputTableName, pk.ColumnName, Operation.Insert));
+                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, context.EntityMapping, generatedColumns));
 
                     //Copy data from temporary table to destination table with ID output to another temporary table.
                     var mergeCommand = context.BuildMergeCommand(tmpTableName, Operation.Insert);
-                    mergeCommand += SqlHelper.BuildOutputId(outputTableName, pk.ColumnName);
+                    mergeCommand += SqlHelper.BuildOutputValues(outputTableName, generatedColumns);
                     mergeCommand += SqlHelper.GetDropTableCommand(tmpTableName);
                     context.ExecuteSqlCommand(mergeCommand);
 
-                    //Load generated IDs from temporary output table into the entities.
-                    context.LoadFromTmpOutputTable(outputTableName, pk, entityList);
+                    //Load generated values from temporary output table into the entities.
+                    context.LoadFromOutputTable(outputTableName, generatedColumns, entityList);
                 }
                 else
                 {

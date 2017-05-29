@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
 namespace EntityFramework.BulkExtensions.Commons.Context
@@ -32,24 +30,6 @@ namespace EntityFramework.BulkExtensions.Commons.Context
             var sqlCommand = CreateCommand(command);
             return sqlCommand.ExecuteNonQuery();
         }
-
-        public IEnumerable<T> SqlQuery<T>(string command) where T : struct
-        {
-            var list = new List<T>();
-            var sqlCommand = CreateCommand(command);
-
-            using (var reader = sqlCommand.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    if (reader.FieldCount > 1)
-                        throw new Exception("The select command must have one column only");
-                    list.Add((T)reader.GetValue(0));
-                }
-            }
-
-            return list;
-        }       
 
         public IDataReader SqlQuery(string command)
         {
