@@ -26,7 +26,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
 
         internal static IEnumerable<IPropertyMapping> GetPropertiesByOptions(this IEntityMapping mapping, BulkOptions options)
         {
-            if (options.HasFlag(BulkOptions.OutputIdentity | options & BulkOptions.OutputComputed))
+            if (options.HasFlag(BulkOptions.OutputIdentity) && options.HasFlag(BulkOptions.OutputComputed))
                 return mapping.Properties.Where(property => property.IsDbGenerated);
             if (options.HasFlag(BulkOptions.OutputIdentity))
                 return mapping.Properties.Where(property => property.IsPk && property.IsDbGenerated);

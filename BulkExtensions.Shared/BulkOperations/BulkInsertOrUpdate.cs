@@ -39,18 +39,22 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                     ? context.EntityMapping.GetPropertiesByOptions(options).ToList()
                     : null;
                 //Create temporary table.
-                context.ExecuteSqlCommand(context.EntityMapping.BuildStagingTableCommand(tmpTableName, Operation.InsertOrUpdate, options));
+                context.ExecuteSqlCommand(context.EntityMapping
+                    .BuildStagingTableCommand(tmpTableName, Operation.InsertOrUpdate, options));
 
                 //Bulk inset data to temporary temporary table.
                 context.BulkInsertToTable(entityList, tmpTableName, Operation.InsertOrUpdate, options);
                 if (willOutputGeneratedValues)
                 {
-                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, context.EntityMapping, generatedColumns));
+                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, 
+                        context.EntityMapping, generatedColumns));
                 }
 
                 //Copy data from temporary table to destination table.
                 var mergeCommand = context.BuildMergeCommand(tmpTableName, Operation.InsertOrUpdate);
-                mergeCommand += willOutputGeneratedValues ? SqlHelper.BuildOutputValues(outputTableName, generatedColumns) : string.Empty;
+                mergeCommand += willOutputGeneratedValues
+                    ? SqlHelper.BuildMergeOutputSet(outputTableName, generatedColumns)
+                    : string.Empty;
                 mergeCommand += SqlHelper.GetDropTableCommand(tmpTableName);
                 var affectedRows = context.ExecuteSqlCommand(mergeCommand);
 

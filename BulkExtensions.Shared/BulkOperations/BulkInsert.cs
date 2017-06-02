@@ -11,7 +11,6 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
     internal class BulkInsert : IBulkOperation
     {
         /// <summary>
-        /// 
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
@@ -36,18 +35,20 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 
                     //Create temporary table.
                     var tmpTableName = context.EntityMapping.RandomTableName();
-                    context.ExecuteSqlCommand(context.EntityMapping.BuildStagingTableCommand(tmpTableName, Operation.Insert, options));
+                    context.ExecuteSqlCommand(context.EntityMapping
+                        .BuildStagingTableCommand(tmpTableName, Operation.Insert, options));
 
                     //Bulk inset data to temporary temporary table.
                     context.BulkInsertToTable(entityList, tmpTableName, Operation.Insert, options);
 
                     //Create output table
                     var outputTableName = context.EntityMapping.RandomTableName();
-                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, context.EntityMapping, generatedColumns));
+                    context.ExecuteSqlCommand(SqlHelper.BuildOutputTableCommand(outputTableName, 
+                        context.EntityMapping, generatedColumns));
 
                     //Copy data from temporary table to destination table with ID output to another temporary table.
                     var mergeCommand = context.BuildMergeCommand(tmpTableName, Operation.Insert);
-                    mergeCommand += SqlHelper.BuildOutputValues(outputTableName, generatedColumns);
+                    mergeCommand += SqlHelper.BuildMergeOutputSet(outputTableName, generatedColumns);
                     mergeCommand += SqlHelper.GetDropTableCommand(tmpTableName);
                     context.ExecuteSqlCommand(mergeCommand);
 
@@ -57,7 +58,8 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                 else
                 {
                     //Bulk inset data to temporary destination table.
-                    context.BulkInsertToTable(entityList, context.EntityMapping.FullTableName, Operation.Insert, options);
+                    context.BulkInsertToTable(entityList, context.EntityMapping.FullTableName, Operation.Insert,
+                        options);
                 }
 
                 //Commit if internal transaction exists.

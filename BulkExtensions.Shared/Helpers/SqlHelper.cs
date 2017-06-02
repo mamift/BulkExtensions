@@ -179,7 +179,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             return command.ToString();
         }
 
-        internal static string BuildOutputValues(string outputTableName, IEnumerable<IPropertyMapping> properties)
+        internal static string BuildMergeOutputSet(string outputTableName, IEnumerable<IPropertyMapping> properties)
         {
             var propertyMappings = properties as IList<IPropertyMapping> ?? properties.ToList();
             var insertedColumns = string.Join(", ", propertyMappings.Select(property => $"INSERTED.{property.ColumnName}"));
