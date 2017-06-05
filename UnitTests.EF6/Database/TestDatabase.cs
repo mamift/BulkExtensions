@@ -7,18 +7,18 @@ namespace UnitTests.EF6.Database
     public class TestDatabase : DbContext
     {
 
-        public TestDatabase() : base("TestDatabaseWork")
+        public TestDatabase() : base("TestDatabaseLocal")
         {
         }
         
         public DbSet<Person> People { get; set; }
         public DbSet<SimpleModel> SimpleModel { get; set; }
-        public DbSet<FirstKeyEntity> FirstKeyEntities { get; set; }
-        public DbSet<SecondKeyEntity> SecondKeyEntities { get; set; }
-        public DbSet<CompositeKeyEntity> CompositeKeyEntities { get; set; }
+        public DbSet<FirstKeyEntity> FirstKeyEntity { get; set; }
+        public DbSet<SecondKeyEntity> SecondKeyEntity { get; set; }
+        public DbSet<CompositeKeyEntity> CompositeKeyEntity { get; set; }
         public DbSet<CustomSchemaEntity> CustomSchemaEntities { get; set; }
-        public DbSet<NotIncrementIdEntity> NotIncrementIdEntities { get; set; }
-        public DbSet<ComputedEntity> ComputedEntities { get; set; }
+        public DbSet<NotIncrementIdEntity> NotIncrementIdEntity { get; set; }
+        public DbSet<ComputedEntity> ComputedEntity { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

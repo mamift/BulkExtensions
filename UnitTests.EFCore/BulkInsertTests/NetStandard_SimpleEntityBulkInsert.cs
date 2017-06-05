@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions;
@@ -9,21 +9,25 @@ using Xunit;
 
 namespace UnitTests.EFCore.BulkInsertTests
 {
-    public class CustomSchemaBulkInsert : IDisposable
+    public class NetStandard_SimpleEntityBulkInsert : IDisposable
     {
         private readonly TestDatabase _context;
-        private readonly IList<CustomSchemaEntity> _collection;
+        private readonly IList<SimpleModel> _collection;
 
-        public CustomSchemaBulkInsert()
+        public NetStandard_SimpleEntityBulkInsert()
         {
             _context = new TestDatabase();
             ClearTable();
-            _collection = new List<CustomSchemaEntity>();
+            _collection = new List<SimpleModel>();
             for (var i = 0; i < 10; i++)
             {
-                _collection.Add(new CustomSchemaEntity
+                _collection.Add(new SimpleModel
                 {
-                    Name = Helper.RandomString(10)
+                    StringProperty = Helper.RandomString(10),
+                    IntValue = Helper.RandomInt(),
+                    DateTime = DateTime.Today,
+                    Type = Helper.RandomEnum(),
+                    DoubleValue = Helper.RandomDouble(1, 10)
                 });
             }
         }
@@ -41,7 +45,7 @@ namespace UnitTests.EFCore.BulkInsertTests
         public void TestInsertedEntitiesCount()
         {
             _context.BulkInsert(_collection);
-            var simpleModels = _context.CustomSchemaEntities.ToList();
+            var simpleModels = _context.SimpleModel.ToList();
             Assert.Equal(simpleModels.Count, _collection.Count);
         }
 
@@ -49,7 +53,7 @@ namespace UnitTests.EFCore.BulkInsertTests
         public void TestInsertValuesSavedCorrectly()
         {
             _context.BulkInsert(_collection);
-            var simpleModels = _context.CustomSchemaEntities
+            var simpleModels = _context.SimpleModel
                 .OrderBy(model => model.Id)
                 .ToList();
 
@@ -59,13 +63,18 @@ namespace UnitTests.EFCore.BulkInsertTests
             {
                 var entity = _collection[i];
                 var saved = simpleModels[i];
-                Assert.Equal(entity.Name, saved.Name);
+                Assert.NotEqual(entity.Id, saved.Id);
+                Assert.Equal(entity.DateTime, saved.DateTime);
+                Assert.Equal(entity.DoubleValue, saved.DoubleValue);
+                Assert.Equal(entity.IntValue, saved.IntValue);
+                Assert.Equal(entity.Type, saved.Type);
+                Assert.Equal(entity.StringProperty, saved.StringProperty);
             }
         }
 
         #endregion
 
-        #region Output Identity Set
+        #region Output Indentity Set
 
         [Fact]
         public void TestAffectedRowsCount_OutputIdentity()
@@ -85,18 +94,22 @@ namespace UnitTests.EFCore.BulkInsertTests
         public void TestInsertValuesSavedCorrectly_OutputIdentity()
         {
             _context.BulkInsert(_collection, InsertOptions.OutputIdentity);
-            var savedModel = _context.CustomSchemaEntities
+            var simpleModels = _context.SimpleModel
                 .OrderBy(model => model.Id)
                 .ToList();
 
-            Assert.Equal(savedModel.Count, _collection.Count);
+            Assert.Equal(simpleModels.Count, _collection.Count);
 
             for (var i = 0; i < _collection.Count; i++)
             {
                 var entity = _collection[i];
-                var saved = savedModel[i];
+                var saved = simpleModels[i];
                 Assert.Equal(entity.Id, saved.Id);
-                Assert.Equal(entity.Name, saved.Name);
+                Assert.Equal(entity.DateTime, saved.DateTime);
+                Assert.Equal(entity.DoubleValue, saved.DoubleValue);
+                Assert.Equal(entity.IntValue, saved.IntValue);
+                Assert.Equal(entity.Type, saved.Type);
+                Assert.Equal(entity.StringProperty, saved.StringProperty);
             }
         }
 
@@ -122,36 +135,40 @@ namespace UnitTests.EFCore.BulkInsertTests
         public void TestInsertValuesSavedCorrectly_OutputComputed()
         {
             _context.BulkInsert(_collection, InsertOptions.OutputComputed);
-            var savedModel = _context.CustomSchemaEntities
+            var simpleModels = _context.SimpleModel
                 .OrderBy(model => model.Id)
                 .ToList();
 
-            Assert.Equal(savedModel.Count, _collection.Count);
+            Assert.Equal(simpleModels.Count, _collection.Count);
 
             for (var i = 0; i < _collection.Count; i++)
             {
                 var entity = _collection[i];
-                var saved = savedModel[i];
+                var saved = simpleModels[i];
                 Assert.NotEqual(entity.Id, saved.Id);
-                Assert.Equal(entity.Name, saved.Name);
+                Assert.Equal(entity.DateTime, saved.DateTime);
+                Assert.Equal(entity.DoubleValue, saved.DoubleValue);
+                Assert.Equal(entity.IntValue, saved.IntValue);
+                Assert.Equal(entity.Type, saved.Type);
+                Assert.Equal(entity.StringProperty, saved.StringProperty);
             }
         }
 
         #endregion
         
-        #region Output Identity & Computed Set
+        #region Output Indentity & Computed Set
 
         [Fact]
         public void TestAffectedRowsCount_OutputIdentityComputed()
         {
-            var rowsCount = _context.BulkInsert(_collection, InsertOptions.OutputIdentity  | InsertOptions.OutputComputed);
+            var rowsCount = _context.BulkInsert(_collection, InsertOptions.OutputIdentity | InsertOptions.OutputComputed);
             Assert.Equal(rowsCount, _collection.Count);
         }
 
         [Fact]
         public void TestInsertedEntitiesIdentities_OutputIdentityComputed()
         {
-            _context.BulkInsert(_collection, InsertOptions.OutputIdentity  | InsertOptions.OutputComputed);
+            _context.BulkInsert(_collection, InsertOptions.OutputIdentity | InsertOptions.OutputComputed);
             Assert.True(_collection.All(model => model.Id != 0));
         }
 
@@ -159,18 +176,22 @@ namespace UnitTests.EFCore.BulkInsertTests
         public void TestInsertValuesSavedCorrectly_OutputIdentityComputed()
         {
             _context.BulkInsert(_collection, InsertOptions.OutputIdentity | InsertOptions.OutputComputed);
-            var savedModel = _context.CustomSchemaEntities
+            var simpleModels = _context.SimpleModel
                 .OrderBy(model => model.Id)
                 .ToList();
 
-            Assert.Equal(savedModel.Count, _collection.Count);
+            Assert.Equal(simpleModels.Count, _collection.Count);
 
             for (var i = 0; i < _collection.Count; i++)
             {
                 var entity = _collection[i];
-                var saved = savedModel[i];
+                var saved = simpleModels[i];
                 Assert.Equal(entity.Id, saved.Id);
-                Assert.Equal(entity.Name, saved.Name);
+                Assert.Equal(entity.DateTime, saved.DateTime);
+                Assert.Equal(entity.DoubleValue, saved.DoubleValue);
+                Assert.Equal(entity.IntValue, saved.IntValue);
+                Assert.Equal(entity.Type, saved.Type);
+                Assert.Equal(entity.StringProperty, saved.StringProperty);
             }
         }
 
@@ -183,7 +204,7 @@ namespace UnitTests.EFCore.BulkInsertTests
 
         private void ClearTable()
         {
-            _context.CustomSchemaEntities.RemoveRange(_context.CustomSchemaEntities.ToList());
+            _context.SimpleModel.RemoveRange(_context.SimpleModel.ToList());
             _context.SaveChanges();
         }
     }

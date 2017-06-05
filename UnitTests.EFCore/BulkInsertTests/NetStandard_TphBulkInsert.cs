@@ -9,12 +9,12 @@ using Xunit;
 
 namespace UnitTests.EFCore.BulkInsertTests
 {
-    public class TphBulkInsert : IDisposable
+    public class NetStandard_TphBulkInsert : IDisposable
     {
         private readonly TestDatabase _context;
         private readonly IList<Person> _collection;
 
-        public TphBulkInsert()
+        public NetStandard_TphBulkInsert()
         {
             _context = new TestDatabase();
             ClearTable();

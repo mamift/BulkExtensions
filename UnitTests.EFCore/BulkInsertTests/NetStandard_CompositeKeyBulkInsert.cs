@@ -9,7 +9,7 @@ using Xunit;
 
 namespace UnitTests.EFCore.BulkInsertTests
 {
-    public class CompositeKeyBulkInsert : IDisposable
+    public class NetStandard_CompositeKeyBulkInsert : IDisposable
     {
         private readonly TestDatabase _context;
         private readonly IList<CompositeKeyEntity> _collection;
@@ -18,7 +18,7 @@ namespace UnitTests.EFCore.BulkInsertTests
         private readonly SecondKeyEntity _secondKeyEntity1;
         private readonly SecondKeyEntity _secondKeyEntity2;
 
-        public CompositeKeyBulkInsert()
+        public NetStandard_CompositeKeyBulkInsert()
         {
             _context = new TestDatabase();
             ClearTable();

@@ -2,19 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions;
-using UnitTests.EFCore.Database;
-using UnitTests.EFCore.Helpers;
-using UnitTests.EFCore.Model;
+using UnitTests.EF6.Database;
+using UnitTests.EF6.Helpers;
+using UnitTests.EF6.Model;
 using Xunit;
 
-namespace UnitTests.EFCore.BulkInsertTests
+namespace UnitTests.EF6.BulkInsertTests
 {
-    public class NotIncrementBulkInsert : IDisposable
+    public class EF6_NotIncrementBulkInsert : IDisposable
     {
         private readonly TestDatabase _context;
         private readonly IList<NotIncrementIdEntity> _collection;
 
-        public NotIncrementBulkInsert()
+        public EF6_NotIncrementBulkInsert()
         {
             _context = new TestDatabase();
             ClearTable();

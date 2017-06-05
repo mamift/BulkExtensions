@@ -2,7 +2,7 @@ using System.Data.Entity;
 
 namespace UnitTests.EF6.Database
 {
-    public class TestDatabaseInitializer : DropCreateDatabaseAlways<TestDatabase>
+    public class TestDatabaseInitializer : DropCreateDatabaseIfModelChanges<TestDatabase>
     {
         protected override void Seed(TestDatabase context)
         {
