@@ -66,7 +66,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                     ColumnName = property.Relational().ColumnName,
                     IsPk = property.IsPrimaryKey(),
                     IsFk = property.IsForeignKey(),
-                    IsDbGenerated = property.RequiresValueGenerator
+                    IsDbGenerated = property.ValueGenerated != ValueGenerated.Never
                 });
         }
     }

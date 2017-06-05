@@ -96,7 +96,6 @@ namespace EntityFramework.BulkExtensions.Mapping
             var mapping = typeMappings.Select(typeMapping => typeMapping.Fragments.First());
             var scalarIPropertyMappings = mapping
                 .SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
-                .Where(propertyMapping => !propertyMapping.Column.IsStoreGeneratedComputed)
                 .ToList();
 
             var propertyMappings = new List<IPropertyMapping>();
