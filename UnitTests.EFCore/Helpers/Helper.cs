@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using UnitTests.EFCore.Model;
+using UnitTests.NetStandard.Model;
 
-namespace UnitTests.EFCore.Helpers
+namespace UnitTests.NetStandard.Helpers
 {
     public static class Helper
     {

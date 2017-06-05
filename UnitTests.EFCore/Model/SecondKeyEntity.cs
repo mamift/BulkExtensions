@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace UnitTests.EFCore.Model
+namespace UnitTests.NetStandard.Model
 {
     public class SecondKeyEntity
     {

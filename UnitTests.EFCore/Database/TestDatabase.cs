@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UnitTests.EFCore.Model;
+using UnitTests.NetStandard.Model;
 
-namespace UnitTests.EFCore.Database
+namespace UnitTests.NetStandard.Database
 {
     public class TestDatabase : DbContext
     {

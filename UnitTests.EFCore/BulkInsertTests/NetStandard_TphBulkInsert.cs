@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EntityFramework.BulkExtensions;
-using UnitTests.EFCore.Database;
-using UnitTests.EFCore.Helpers;
-using UnitTests.EFCore.Model;
+using UnitTests.NetStandard.Database;
+using UnitTests.NetStandard.Helpers;
+using UnitTests.NetStandard.Model;
 using Xunit;
 
-namespace UnitTests.EFCore.BulkInsertTests
+namespace UnitTests.NetStandard.BulkInsertTests
 {
     public class NetStandard_TphBulkInsert : IDisposable
     {

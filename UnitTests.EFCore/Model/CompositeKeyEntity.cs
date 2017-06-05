@@ -1,4 +1,4 @@
-namespace UnitTests.EFCore.Model
+namespace UnitTests.NetStandard.Model
 {
     public class CompositeKeyEntity
     {

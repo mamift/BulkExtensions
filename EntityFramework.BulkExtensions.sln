@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.4
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFramework.BulkExtensions", "EntityFramework.BulkExtensions\EntityFramework.BulkExtensions.csproj", "{0EEFC012-A432-4F85-9745-316A011B9C9C}"
 EndProject
@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.BulkExt
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BulkExtensions.Shared", "BulkExtensions.Shared\BulkExtensions.Shared.shproj", "{F6FDEB96-A3DF-4CCF-A0E0-AF0E8881E955}"
 EndProject
-Project("{D89FD17E-F621-43C5-A5DC-42BB24525A9E}") = "UnitTests.EFCore", "UnitTests.EFCore\UnitTests.EFCore.csproj", "{17031DEF-7710-4A95-8CFA-3A95926F5582}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests.NetStandard", "UnitTests.EFCore\UnitTests.NetStandard.csproj", "{17031DEF-7710-4A95-8CFA-3A95926F5582}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.EF6", "UnitTests.EF6\UnitTests.EF6.csproj", "{6AA4FBEA-B746-4212-91B6-FD963FA3CCBA}"
 EndProject

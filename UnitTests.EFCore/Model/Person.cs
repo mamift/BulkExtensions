@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace UnitTests.EFCore.Model
+namespace UnitTests.NetStandard.Model
 {
     public class Person
     {
