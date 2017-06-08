@@ -4,7 +4,7 @@ using EntityFramework.BulkExtensions.Commons.Mapping;
 namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal class DbContextWrapper : IDbContextWrapper
-    {                
+    {
         internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping)
         {
             Connection = connection;
@@ -21,7 +21,10 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         public IDbTransaction Transaction { get; }
         private bool IsInternalTransaction { get; }
 
-        public int Timeout { get; set; } = 60;
+        private const int MinimumTimeout = 60;
+        public int Timeout => Connection.ConnectionTimeout > MinimumTimeout
+            ? Connection.ConnectionTimeout
+            : MinimumTimeout;
 
         public int BatchSize { get; set; } = 5000;
 
@@ -59,7 +62,6 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         {
             if (IsInternalTransaction)
             {
-                Transaction.Rollback();
                 Transaction.Dispose();
             }
         }

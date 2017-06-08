@@ -54,9 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BulkExtensions.cs" />
     <Compile Include="Extensions\DbContextExtension.cs" />
-    <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Mapping\MappingExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

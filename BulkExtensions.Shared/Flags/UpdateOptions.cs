@@ -3,9 +3,9 @@
 namespace EntityFramework.BulkExtensions
 {
     [Flags]
-    internal enum UpdateOptions
+    public enum UpdateOptions
     {
         Default = 1,
-        KeepForeinKeys = 4
+        OutputComputed = 4
     }
 }

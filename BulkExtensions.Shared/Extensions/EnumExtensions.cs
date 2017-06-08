@@ -1,6 +1,6 @@
 ﻿using EntityFramework.BulkExtensions.Commons.Flags;
 
-namespace EntityFramework.BulkExtensions.Extensions
+namespace EntityFramework.BulkExtensions.Commons.Extensions
 {
     internal static class EnumExtensions
     {

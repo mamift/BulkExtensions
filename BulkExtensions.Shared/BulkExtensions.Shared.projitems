@@ -9,16 +9,14 @@
     <Import_RootNamespace>BulkExtensions.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkDelete.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkInsert.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkInsertOrUpdate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkUpdate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\IBulkOperation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\OperationFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Context\DbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Context\IDbContextWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkInsertExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DataReaderExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\EnumExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MappingExtention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\BulkException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Flags\InsertOptions.cs" />

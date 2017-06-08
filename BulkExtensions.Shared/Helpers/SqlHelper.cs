@@ -70,7 +70,6 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                     break;
                 case Operation.Update:
                     command += context.EntityMapping.BuildMergeUpdateSet();
-                    command += GetDropTableCommand(tmpTableName);
                     break;
                 case Operation.InsertOrUpdate:
                     command += context.EntityMapping.BuildMergeUpdateSet();
@@ -78,7 +77,6 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                     break;
                 case Operation.Delete:
                     command += "WHEN MATCHED THEN DELETE";
-                    command += GetDropTableCommand(tmpTableName);
                     break;
             }
 
