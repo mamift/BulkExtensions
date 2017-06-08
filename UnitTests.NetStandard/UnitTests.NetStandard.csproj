@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore">
@@ -14,10 +14,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj">
-      <Project>{13d314c8-ffe3-4c8d-8139-2cfe43214083}</Project>
-      <Name>EntityFrameworkCore.BulkExtensions.NetStandard</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\EntityFrameworkCore.BulkExtensions.NetStandard\EntityFrameworkCore.BulkExtensions.NetStandard.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

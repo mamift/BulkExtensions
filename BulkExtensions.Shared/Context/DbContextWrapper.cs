@@ -5,12 +5,16 @@ namespace EntityFramework.BulkExtensions.Commons.Context
 {
     internal class DbContextWrapper : IDbContextWrapper
     {
-        internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping)
+        private const int DefaultTimeout = 60;
+        private const int DefaultBatchSize = 5000;
+
+        internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping, int? commandTimeout)
         {
             Connection = connection;
             if (Connection.State != ConnectionState.Open)
                 Connection.Open();
 
+            Timeout = commandTimeout ?? DefaultTimeout;
             IsInternalTransaction = transaction == null;
             Transaction = transaction ?? connection.BeginTransaction();
             EntityMapping = entityMapping;
@@ -21,12 +25,14 @@ namespace EntityFramework.BulkExtensions.Commons.Context
         public IDbTransaction Transaction { get; }
         private bool IsInternalTransaction { get; }
 
-        private const int MinimumTimeout = 60;
-        public int Timeout => Connection.ConnectionTimeout > MinimumTimeout
-            ? Connection.ConnectionTimeout
-            : MinimumTimeout;
+        private int _currentTimeout;
+        public int Timeout
+        {
+            get => _currentTimeout;
+            private set => _currentTimeout = value > DefaultTimeout ? value : DefaultTimeout;
+        }
 
-        public int BatchSize { get; set; } = 5000;
+        public int BatchSize { get; } = DefaultBatchSize;
 
         public int ExecuteSqlCommand(string command)
         {

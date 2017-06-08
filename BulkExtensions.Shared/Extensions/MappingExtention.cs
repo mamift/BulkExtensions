@@ -17,7 +17,7 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
                 case Operation.Update:
                     return mapping.Properties
                         .Where(propertyMapping => !propertyMapping.IsHierarchyMapping)
-                        .Where(propertyMapping => !propertyMapping.IsDbGenerated);
+                        .Where(propertyMapping => propertyMapping.IsPk || !propertyMapping.IsDbGenerated);
                 default:
                     return mapping.Properties
                         .Where(propertyMapping => propertyMapping.IsPk || !propertyMapping.IsDbGenerated);

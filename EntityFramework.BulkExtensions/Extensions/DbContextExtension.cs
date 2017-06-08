@@ -8,9 +8,9 @@ namespace EntityFramework.BulkExtensions.Extensions
     {
         internal static DbContextWrapper GetContextWrapper<TEntity>(this DbContext context) where TEntity : class
         {
-            var database = context.Database;            
+            var database = context.Database;
             return new DbContextWrapper(database.Connection, database.CurrentTransaction?.UnderlyingTransaction,
-                context.Mapping<TEntity>());
+                context.Mapping<TEntity>(), context.Database.CommandTimeout);
         }
     }
 }

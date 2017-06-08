@@ -16,7 +16,7 @@ namespace EntityFramework.BulkExtensions.Extensions
             var connection = relationalConnection.DbConnection;
             var transaction = relationalConnection.CurrentTransaction?.GetDbTransaction();
 
-            return new DbContextWrapper(connection, transaction, context.Mapping<TEntity>());
+            return new DbContextWrapper(connection, transaction, context.Mapping<TEntity>(), context.Database.GetCommandTimeout());
         }
     }
 }
