@@ -2,7 +2,7 @@
 #if EF6 
 using System.Data.Entity;
 #endif
-using BulkExtensions.Shared.BulkOperations;
+using EntityFramework.BulkExtensions.Commons.BulkOperations;
 using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Extensions;

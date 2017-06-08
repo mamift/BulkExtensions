@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkOperation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\IBulkOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Context\DbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Context\IDbContextWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BulkOperations\BulkExtensions.cs" />

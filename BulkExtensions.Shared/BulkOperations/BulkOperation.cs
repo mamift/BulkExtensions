@@ -6,7 +6,7 @@ using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 
-namespace BulkExtensions.Shared.BulkOperations
+namespace EntityFramework.BulkExtensions.Commons.BulkOperations
 {
     internal static class BulkOperation
     {
