@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
@@ -18,9 +19,9 @@ namespace EntityFramework.BulkExtensions.Mapping
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <returns></returns>
-        internal static IEntityMapping Mapping<TEntity>(this DbContext context) where TEntity : class
+        internal static IEntityMapping Mapping<TEntity>(this DbContext context, Type type = null) where TEntity : class
         {
-            var entityTypeMapping = context.GetEntityMapping<TEntity>();
+            var entityTypeMapping = context.GetEntityMapping<TEntity>(type);
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
             var properties = entityTypeMapping.GetIPropertyMapping();
 
@@ -107,7 +108,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 {
                     ColumnName = propertyMapping.Column.Name,
                     PropertyName = propertyMapping.Property.Name,
-                    IsPk = ((EntityType) propertyMapping.Column.DeclaringType).KeyProperties
+                    IsPk = ((EntityType)propertyMapping.Column.DeclaringType).KeyProperties
                         .Any(property => property.Name.Equals(propertyMapping.Column.Name)),
                     IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
                     || propertyMapping.Column.IsStoreGeneratedComputed
@@ -146,13 +147,14 @@ namespace EntityFramework.BulkExtensions.Mapping
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="context"></param>
         /// <returns></returns>
-        private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<TEntity>(this IObjectContextAdapter context) where TEntity : class
+        private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<TEntity>(this IObjectContextAdapter context, Type type = null) where TEntity : class
         {
+            var collectionType = type ?? typeof(TEntity);
             var metadata = context.ObjectContext.MetadataWorkspace;
             var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
             var entityType = metadata
                 .GetItems<EntityType>(DataSpace.OSpace)
-                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
+                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == collectionType);
             if (entityType == null)
                 throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
