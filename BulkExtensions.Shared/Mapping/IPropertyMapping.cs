@@ -8,5 +8,6 @@
         bool IsFk { get; }
         bool IsHierarchyMapping { get; }
         bool IsDbGenerated { get; }
+        NavigationPropertyMapping NavigationProperty { get; set; }
     }
 }

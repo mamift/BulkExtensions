@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-#if EF6 
+#if EF6
 using System.Data.Entity;
 #endif
 using EntityFramework.BulkExtensions.Commons.BulkOperations;
@@ -9,6 +8,7 @@ using EntityFramework.BulkExtensions.Commons.Extensions;
 using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Extensions;
 #if !EF6
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 #endif
 
@@ -70,49 +70,44 @@ namespace EntityFramework.BulkExtensions
 #if EF6
 
         public static void BulkSaveChanges(this DbContext context)
-        {
-
-
-
-            var toAdd = context.ChangeTracker
-                .Entries()
-                .Where(entry => entry.State == EntityState.Added)
-                .GroupBy(entry => entry.Entity.GetType())
-                .ToList();
-
-            var toDelete = context.ChangeTracker
-                .Entries()
-                .Where(entry => entry.State == EntityState.Deleted)
-                .GroupBy(entry => entry.Entity.GetType())
-                .ToList();
-
-            foreach (var groupedEntities in toAdd)
+        {            
+            var currentTranstaction = context.Database.CurrentTransaction;
+            using (var transaction = currentTranstaction ?? context.Database.BeginTransaction())
             {
-                var entities = groupedEntities
-                    .Select(entry => Convert.ChangeType(entry.Entity, groupedEntities.Key))
-                    .ToList();
-                context.GetContextWrapper(groupedEntities.Key).CommitTransaction(entities, Operation.Insert, BulkOptions.OutputIdentity | BulkOptions.OutputComputed);
+                var toAddOrUpdate = context.GetEntriesByState(EntityState.Added | EntityState.Modified);
+                var toDelete = context.GetEntriesByState(EntityState.Deleted);
 
-                foreach (var groupedEntity in groupedEntities)
+                foreach (var groupedEntities in toAddOrUpdate)
                 {
-                    groupedEntity.State = EntityState.Unchanged;
+                    var entities = groupedEntities
+                        .Select(entry => entry.Entity)
+                        .ToList();
+                    context.GetContextWrapper(groupedEntities.Key).CommitTransaction(entities, Operation.InsertOrUpdate,
+                        BulkOptions.OutputIdentity | BulkOptions.OutputComputed);
+
+                    foreach (var groupedEntity in groupedEntities)
+                    {
+                        groupedEntity.State = EntityState.Unchanged;
+                    }
                 }
-            }
 
-            foreach (var groupedEntities in toDelete)
-            {
-                var entities = groupedEntities
-                    .Select(entry => Convert.ChangeType(entry.Entity, groupedEntities.Key))
-                    .ToList();
-                context.GetContextWrapper(groupedEntities.Key).CommitTransaction(entities, Operation.Delete);
-
-                foreach (var groupedEntity in groupedEntities)
+                foreach (var groupedEntities in toDelete)
                 {
-                    groupedEntity.State = EntityState.Detached;
-                }
-            }
+                    var entities = groupedEntities
+                        .Select(entry => entry.Entity)
+                        .ToList();
+                    context.GetContextWrapper(groupedEntities.Key).CommitTransaction(entities, Operation.Delete);
 
-            context.SaveChanges();
+                    foreach (var groupedEntity in groupedEntities)
+                    {
+                        groupedEntity.State = EntityState.Detached;
+                    }
+                }
+
+                context.SaveChanges();
+                if (currentTranstaction == null)
+                    transaction.Commit();
+            }
         }
 #endif
     }

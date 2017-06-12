@@ -15,17 +15,18 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             var rows = new List<object[]>();
 
             var propertyMappings = tableColumns as IList<IPropertyMapping> ?? tableColumns.ToList();
-            for(var index = 0; index < entities.Count; index++)
+            for (var index = 0; index < entities.Count; index++)
             {
                 var entity = entities[index];
-                var properties = entity.GetType()
-                    .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
+                var properties = entity.GetType().GetPropertyInfo().ToList();
                 var row = new List<object>();
                 foreach (var propertyMapping in propertyMappings)
                 {
                     var propertyInfo = properties.SingleOrDefault(info => info.Name == propertyMapping.PropertyName);
-                    if (propertyInfo != null)
+                    if (propertyInfo != null && !propertyMapping.IsFk)
                         row.Add(propertyInfo.GetValue(entity, null) ?? DBNull.Value);
+                    else if (propertyMapping.IsFk)
+                        row.Add(entity.GetForeingKeyValue(properties, propertyInfo, propertyMapping));
                     else if (propertyMapping.IsHierarchyMapping)
                         row.Add(mapping.HierarchyMapping[entity.GetType().Name]);
                     else if (propertyMapping.PropertyName.Equals(SqlHelper.Identity))
@@ -38,6 +39,28 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             }
 
             return new EnumerableDataReader(propertyMappings.Select(propertyMapping => propertyMapping.ColumnName), rows);
+        }
+
+        private static object GetForeingKeyValue<TEntity>(this TEntity entity, IEnumerable<PropertyInfo> properties,
+            PropertyInfo propertyInfo, IPropertyMapping propertyMapping) where TEntity : class
+        {
+            var navigation = properties
+                .Single(info => info.Name == propertyMapping.NavigationProperty.Name)
+                .GetValue(entity, null);
+            if (navigation == null)
+            {
+                if (propertyInfo != null)
+                    return propertyInfo.GetValue(entity, null) ?? DBNull.Value;
+                else
+                    return DBNull.Value;
+            }
+            else
+            {
+                var detinationProperty = navigation.GetType().GetPropertyInfo()
+                    .Single(info => info.Name == propertyMapping.NavigationProperty.PropertyName);
+
+                return detinationProperty.GetValue(navigation, null) ?? DBNull.Value;
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using EntityFramework.BulkExtensions.Commons.Flags;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
@@ -40,6 +42,11 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
         {
             return options.HasFlag(BulkOptions.OutputIdentity) && mapping.HasGeneratedKeys
                    || options.HasFlag(BulkOptions.OutputComputed) && mapping.HasComputedColumns;
+        }
+
+        internal static IEnumerable<PropertyInfo> GetPropertyInfo(this Type type)
+        {
+            return type.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
         }
     }
 }
