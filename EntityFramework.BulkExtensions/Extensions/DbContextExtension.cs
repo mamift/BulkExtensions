@@ -30,7 +30,7 @@ namespace EntityFramework.BulkExtensions.Extensions
             return context.ChangeTracker
                 .Entries()
                 .Where(entry => state.HasFlag(entry.State))
-                .GroupBy(entry => entry.Entity.GetType())
+                .GroupBy(entry => entry.Entity.GetType().BaseType != typeof(object) ? entry.Entity.GetType().BaseType : entry.Entity.GetType())
                 .ToList();
         }
     }

@@ -94,12 +94,15 @@ namespace EntityFramework.BulkExtensions.Mapping
         private static IList<IPropertyMapping> GetIPropertyMapping(this IEnumerable<EntityTypeMapping> entityTypeMapping)
         {
             var typeMappings = entityTypeMapping.ToList();
+            var entityTypes = typeMappings.Select(typeMapping => typeMapping.EntityType);
 
             var mapping = typeMappings
                 .Select(typeMapping => typeMapping.Fragments.First())
                 .ToList();
             var navigationProperties = mapping
+                .Where(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType != null)
                 .SelectMany(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType.NavigationProperties)
+                .Distinct()
                 .ToList();
             var scalarPropertyMapping = mapping
                 .SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
@@ -121,6 +124,7 @@ namespace EntityFramework.BulkExtensions.Mapping
 
             navigationProperties.ForEach(navigationProperty =>
             {
+                if (navigationProperty.ToEndMember.RelationshipMultiplicity == RelationshipMultiplicity.Many) return;
                 navigationProperty.GetNavigationPropertyMappings(propertyMappings, keyProperties);
             });
 
