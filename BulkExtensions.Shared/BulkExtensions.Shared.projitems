@@ -26,8 +26,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\GuidHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\SqlHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\EntityMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mapping\EntryWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IEntityMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IPropertyMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\PropertyMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mapping\RelationshipInfo.cs" />
   </ItemGroup>
 </Project>

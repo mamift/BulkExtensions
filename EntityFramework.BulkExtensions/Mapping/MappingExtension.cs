@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
@@ -21,7 +20,8 @@ namespace EntityFramework.BulkExtensions.Mapping
         /// <returns></returns>
         internal static IEntityMapping Mapping<TEntity>(this DbContext context, Type type = null) where TEntity : class
         {
-            var entityTypeMapping = context.GetEntityMapping<TEntity>(type);
+            var entitySetMapping = context.GetEntityMapping<TEntity>(type);
+            var entityTypeMapping = entitySetMapping.EntityTypeMappings;
             var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
             var properties = entityTypeMapping.GetIPropertyMapping();
 
@@ -94,7 +94,6 @@ namespace EntityFramework.BulkExtensions.Mapping
         private static IList<IPropertyMapping> GetIPropertyMapping(this IEnumerable<EntityTypeMapping> entityTypeMapping)
         {
             var typeMappings = entityTypeMapping.ToList();
-            var entityTypes = typeMappings.Select(typeMapping => typeMapping.EntityType);
 
             var mapping = typeMappings
                 .Select(typeMapping => typeMapping.Fragments.First())
@@ -129,7 +128,7 @@ namespace EntityFramework.BulkExtensions.Mapping
             });
 
             return propertyMappings;
-        }
+        }        
 
         private static void GetNavigationPropertyMappings(this NavigationProperty navigationProperty,
             ICollection<IPropertyMapping> propertyMappings, IEnumerable<EdmMember> keyProperties)
@@ -226,7 +225,7 @@ namespace EntityFramework.BulkExtensions.Mapping
         /// <param name="context"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        private static ReadOnlyCollection<EntityTypeMapping> GetEntityMapping<TEntity>(this IObjectContextAdapter context, Type type = null) where TEntity : class
+        private static EntitySetMapping GetEntityMapping<TEntity>(this IObjectContextAdapter context, Type type = null) where TEntity : class
         {
             var collectionType = type ?? typeof(TEntity);
             var metadata = context.ObjectContext.MetadataWorkspace;
@@ -248,7 +247,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .EntitySetMappings
                 .Single(s => s.EntitySet == entitySet);
 
-            return mapping.EntityTypeMappings;
+            return mapping;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 #if EF6
 using System.Linq;
 using System.Data.Entity;
@@ -82,6 +83,7 @@ namespace EntityFramework.BulkExtensions
                     var entities = groupedEntities
                         .Select(entry => entry.Entity)
                         .ToList();
+
                     context.GetContextWrapper(groupedEntities.Key).CommitTransaction(entities, Operation.InsertOrUpdate,
                         BulkOptions.OutputIdentity | BulkOptions.OutputComputed);
                 }
@@ -101,14 +103,12 @@ namespace EntityFramework.BulkExtensions
             foreach (var groupedEntity in toAddOrUpdate.SelectMany(entries => entries))
             {
                 context.Set(groupedEntity.Entity.GetType()).Attach(groupedEntity.Entity);
-                var manager =
-                    ((IObjectContextAdapter)context).ObjectContext.ObjectStateManager
-                    .GetRelationshipManager(groupedEntity.Entity);
-
             }
-            var RelationshipObjects =
-                ((IObjectContextAdapter) context).ObjectContext.ObjectStateManager.GetObjectStateEntries(EntityState
-                    .Added | EntityState.Modified);
+
+            var RelationshipObjects = ((IObjectContextAdapter)context).ObjectContext.ObjectStateManager
+                .GetObjectStateEntries(EntityState.Added | EntityState.Deleted)
+                .Where(entry => entry.IsRelationship);
+
             foreach (var objectStateEntry in RelationshipObjects)
             {
                 objectStateEntry.AcceptChanges();
