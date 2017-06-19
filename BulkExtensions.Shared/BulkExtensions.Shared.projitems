@@ -30,6 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IEntityMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\IPropertyMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mapping\PropertyMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Mapping\RelationshipInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Flags\EntryState.cs" />
   </ItemGroup>
 </Project>

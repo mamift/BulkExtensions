@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using EntityFramework.BulkExtensions.Commons.Helpers;
 using EntityFramework.BulkExtensions.Commons.Mapping;
 
@@ -17,18 +16,26 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             var propertyMappings = tableColumns as IList<IPropertyMapping> ?? tableColumns.ToList();
             for (var index = 0; index < entities.Count; index++)
             {
-                var entity = entities[index];
-                var properties = entity.GetType().GetPropertyInfo().ToList();
+                var obj = entities[index];
+                var wrapper = obj as EntryWrapper;
+                var entity = wrapper != null
+                    ? wrapper.Entity
+                    : obj;
+
+                var entityType = entity.GetType();
+                var properties = entityType.GetPropertyInfo().ToList();
                 var row = new List<object>();
                 foreach (var propertyMapping in propertyMappings)
                 {
                     var propertyInfo = properties.SingleOrDefault(info => info.Name == propertyMapping.PropertyName);
                     if (propertyInfo != null && !propertyMapping.IsFk)
                         row.Add(propertyInfo.GetValue(entity, null) ?? DBNull.Value);
-                    else if (propertyMapping.IsFk)
-                        row.Add(entity.GetForeingKeyValue(properties, propertyInfo, propertyMapping));
+                    else if (propertyMapping.IsFk && wrapper != null)
+                        row.Add(wrapper.GetForeingKeyValue(propertyMapping));
+					else if (propertyMapping.IsFk && propertyInfo != null)
+						row.Add(propertyInfo.GetValue(entity, null) ?? DBNull.Value);
                     else if (propertyMapping.IsHierarchyMapping)
-                        row.Add(mapping.HierarchyMapping[entity.GetType().Name]);
+                        row.Add(mapping.HierarchyMapping[entityType.Name]);
                     else if (propertyMapping.PropertyName.Equals(SqlHelper.Identity))
                         row.Add(index);
                     else
@@ -41,26 +48,13 @@ namespace EntityFramework.BulkExtensions.Commons.Extensions
             return new EnumerableDataReader(propertyMappings.Select(propertyMapping => propertyMapping.ColumnName), rows);
         }
 
-        private static object GetForeingKeyValue<TEntity>(this TEntity entity, IEnumerable<PropertyInfo> properties,
-            PropertyInfo propertyInfo, IPropertyMapping propertyMapping) where TEntity : class
+        private static object GetForeingKeyValue(this EntryWrapper wrapper, IPropertyMapping propertyMapping)
         {
-            var navigation = properties
-                .Single(info => info.Name == propertyMapping.NavigationProperty.Name)
-                .GetValue(entity, null);
-            if (navigation == null)
-            {
-                if (propertyInfo != null)
-                    return propertyInfo.GetValue(entity, null) ?? DBNull.Value;
-                else
-                    return DBNull.Value;
-            }
-            else
-            {
-                var detinationProperty = navigation.GetType().GetPropertyInfo()
-                    .Single(info => info.Name == propertyMapping.NavigationProperty.PropertyName);
-
-                return detinationProperty.GetValue(navigation, null) ?? DBNull.Value;
-            }
+            if(wrapper?.ForeignKeys == null)
+                return DBNull.Value;
+            if (wrapper.ForeignKeys.TryGetValue(propertyMapping.ForeignKeyName, out object value))
+                return value;
+            return DBNull.Value;
         }
     }
 }

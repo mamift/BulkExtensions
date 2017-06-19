@@ -10,244 +10,257 @@ using EntityFramework.BulkExtensions.Commons.Mapping;
 
 namespace EntityFramework.BulkExtensions.Mapping
 {
-    internal static class MappingExtension
-    {
-        /// <summary>
-        /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        internal static IEntityMapping Mapping<TEntity>(this DbContext context, Type type = null) where TEntity : class
-        {
-            var entitySetMapping = context.GetEntityMapping<TEntity>(type);
-            var entityTypeMapping = entitySetMapping.EntityTypeMappings;
-            var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
-            var properties = entityTypeMapping.GetIPropertyMapping();
+	internal static class MappingExtension
+	{
+		/// <summary>
+		/// </summary>
+		/// <typeparam name="TEntity"></typeparam>
+		/// <param name="context"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		internal static IEntityMapping Mapping<TEntity>(this DbContext context, Type type = null) where TEntity : class
+		{
+			var entitySetMapping = context.GetEntityMapping<TEntity>(type);
+			var entityTypeMapping = entitySetMapping.EntityTypeMappings;
+			var mappings = entityTypeMapping.Select(typeMapping => typeMapping.Fragments.First()).First();
 
-            var entityMapping = new EntityMapping
-            {
-                TableName = mappings.GetTableName(),
-                Schema = mappings.GetTableSchema()
-            };
+			var entityMapping = new EntityMapping
+			{
+				TableName = mappings.GetTableName(),
+				Schema = mappings.GetTableSchema()
+			};
 
-            if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping))
-            {
-                var typeMappings = entityTypeMapping
-                    .Where(typeMapping => !typeMapping.IsHierarchyMapping)
-                    .ToList();
+			var properties = entitySetMapping.GetIPropertyMapping(entityMapping);
 
-                entityMapping.HierarchyMapping = GetHierarchyMappings(typeMappings);
-                properties.Add(GetDiscriminatorProperty(typeMappings));
-            }
+			if (entityTypeMapping.Any(typeMapping => typeMapping.IsHierarchyMapping))
+			{
+				var typeMappings = entityTypeMapping
+					.Where(typeMapping => !typeMapping.IsHierarchyMapping)
+					.ToList();
 
-            entityMapping.Properties = properties;
-            return entityMapping;
-        }
+				entityMapping.HierarchyMapping = GetHierarchyMappings(typeMappings);
+				properties.Add(GetDiscriminatorProperty(typeMappings));
+			}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="typeMappings"></param>
-        /// <returns></returns>
-        private static IPropertyMapping GetDiscriminatorProperty(IEnumerable<EntityTypeMapping> typeMappings)
-        {
-            var discriminator = typeMappings
-                .SelectMany(
-                    typeMapping =>
-                        typeMapping.Fragments.SelectMany(
-                            fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
-                .First(conditionMapping => conditionMapping.Property == null);
+			entityMapping.Properties = properties;
+			return entityMapping;
+		}
 
-            return new Commons.Mapping.PropertyMapping
-            {
-                ColumnName = discriminator.Column.Name,
-                IsHierarchyMapping = true
-            };
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="typeMappings"></param>
+		/// <returns></returns>
+		private static IPropertyMapping GetDiscriminatorProperty(IEnumerable<EntityTypeMapping> typeMappings)
+		{
+			var discriminator = typeMappings
+				.SelectMany(
+					typeMapping =>
+						typeMapping.Fragments.SelectMany(
+							fragment => fragment.Conditions.OfType<ValueConditionMapping>()))
+				.First(conditionMapping => conditionMapping.Property == null);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="typeMappings"></param>
-        /// <returns></returns>
-        private static Dictionary<string, string> GetHierarchyMappings(IEnumerable<EntityTypeMapping> typeMappings)
-        {
-            var hierarchyMapping = new Dictionary<string, string>();
-            foreach (var typeMapping in typeMappings)
-            {
-                var mappingKey = typeMapping.EntityType.Name;
-                var mappingValue = typeMapping.Fragments
-                    .First().Conditions
-                    .OfType<ValueConditionMapping>()
-                    .First(conditionMapping => conditionMapping.Property == null)
-                    .Value;
-                hierarchyMapping.Add(mappingKey, mappingValue.ToString());
-            }
-            return hierarchyMapping;
-        }
+			return new Commons.Mapping.PropertyMapping
+			{
+				ColumnName = discriminator.Column.Name,
+				IsHierarchyMapping = true
+			};
+		}
 
-        /// <summary>
-        /// </summary>
-        /// <param name="entityTypeMapping"></param>
-        /// <returns></returns>
-        private static IList<IPropertyMapping> GetIPropertyMapping(this IEnumerable<EntityTypeMapping> entityTypeMapping)
-        {
-            var typeMappings = entityTypeMapping.ToList();
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="typeMappings"></param>
+		/// <returns></returns>
+		private static Dictionary<string, string> GetHierarchyMappings(IEnumerable<EntityTypeMapping> typeMappings)
+		{
+			var hierarchyMapping = new Dictionary<string, string>();
+			foreach (var typeMapping in typeMappings)
+			{
+				var mappingKey = typeMapping.EntityType.Name;
+				var mappingValue = typeMapping.Fragments
+					.First().Conditions
+					.OfType<ValueConditionMapping>()
+					.First(conditionMapping => conditionMapping.Property == null)
+					.Value;
+				hierarchyMapping.Add(mappingKey, mappingValue.ToString());
+			}
+			return hierarchyMapping;
+		}
 
-            var mapping = typeMappings
-                .Select(typeMapping => typeMapping.Fragments.First())
-                .ToList();
-            var navigationProperties = mapping
-                .Where(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType != null)
-                .SelectMany(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType.NavigationProperties)
-                .Distinct()
-                .ToList();
-            var scalarPropertyMapping = mapping
-                .SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
-                .ToList();
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		private static IList<IPropertyMapping> GetIPropertyMapping(this EntitySetMapping entitySetMapping,
+			EntityMapping entityMapping)
+		{
+			var typeMappings = entitySetMapping.EntityTypeMappings.ToList();
 
-            var keyProperties = mapping
-                .Select(fragment => fragment.StoreEntitySet.ElementType)
-                .SelectMany(entityType => entityType.KeyProperties)
-                .ToList();
+			var mapping = typeMappings
+				.Select(typeMapping => typeMapping.Fragments.First())
+				.ToList();
 
-            var propertyMappings = new List<IPropertyMapping>();
-            scalarPropertyMapping.ForEach(propertyMapping =>
-            {
-                if (propertyMappings.Any(map => map.ColumnName == propertyMapping.Column.Name)) return;
+			var scalarPropertyMapping = mapping
+				.SelectMany(fragment => fragment.PropertyMappings.OfType<ScalarPropertyMapping>())
+				.ToList();
 
-                propertyMappings.Add(propertyMapping.GetPropertyMapping(keyProperties));
+			var navigationProperties = mapping
+				.Where(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType != null)
+				.SelectMany(fragment => ((EntityTypeMapping)fragment.TypeMapping).EntityType.NavigationProperties)
+				.Distinct()
+				.ToList();
 
-            });
+			var keyProperties = mapping
+				.Select(fragment => fragment.StoreEntitySet.ElementType)
+				.SelectMany(entityType => entityType.KeyProperties)
+				.ToList();
 
-            navigationProperties.ForEach(navigationProperty =>
-            {
-                if (navigationProperty.ToEndMember.RelationshipMultiplicity == RelationshipMultiplicity.Many) return;
-                navigationProperty.GetNavigationPropertyMappings(propertyMappings, keyProperties);
-            });
+			var propertyMappings = new List<IPropertyMapping>();
 
-            return propertyMappings;
-        }        
+			propertyMappings.AddRange(entitySetMapping.GetAssociationForeignKeys(entityMapping, keyProperties));
 
-        private static void GetNavigationPropertyMappings(this NavigationProperty navigationProperty,
-            ICollection<IPropertyMapping> propertyMappings, IEnumerable<EdmMember> keyProperties)
-        {
-            var parentKeyProperties = navigationProperty.GetDestinationKey().ToList();
-            var type = navigationProperty.ToEndMember.DeclaringType as AssociationType;
-            var refConst = type?.ReferentialConstraints.ToList();
+			scalarPropertyMapping.ForEach(propertyMapping =>
+			{
+				if (propertyMappings.Any(map => map.ColumnName == propertyMapping.Column.Name)) return;
 
-            if (refConst != null && refConst.Any())
-            {
-                refConst.ForEach(constraint =>
-                {
-                    var columnName = constraint.ToProperties.First().Name;
-                    var detinationProp = type.ReferentialConstraints.First().FromProperties.First().Name;
-                    var propertyMapping = propertyMappings
-                            .SingleOrDefault(pMap => pMap.ColumnName.Equals(columnName))
-                        as Commons.Mapping.PropertyMapping;
+				propertyMappings.Add(propertyMapping.GetPropertyMapping(keyProperties));
 
-                    if (propertyMapping == null) return;
-                    propertyMapping.IsFk = true;
-                    propertyMapping.IsPk = keyProperties
-                        .Any(prop => prop.Name.Equals(columnName));
-                    propertyMapping.NavigationProperty = new NavigationPropertyMapping
-                    {
-                        Name = navigationProperty.Name,
-                        PropertyName = detinationProp
-                    };
-                });
-            }
-            else
-            {
-                parentKeyProperties.ForEach(parentKey =>
-                {
-                    propertyMappings.Add(new Commons.Mapping.PropertyMapping
-                    {
-                        ColumnName = $"{navigationProperty.Name}_{parentKey.Name}",
-                        IsFk = true,
-                        IsPk = keyProperties.Any(prop => prop.Name.Equals($"{navigationProperty.Name}_{parentKey.Name}")),
-                        NavigationProperty = new NavigationPropertyMapping
-                        {
-                            Name = navigationProperty.Name,
-                            PropertyName = parentKey.Name
-                        }
-                    });
-                });
-            }
-        }
+			});
 
-        private static IEnumerable<EdmProperty> GetDestinationKey(this NavigationProperty navigationProperty)
-        {
-            var typeBase = navigationProperty.ToEndMember.DeclaringType as EntityTypeBase;
-            var property = typeBase?.KeyMembers.First(member => member.Name.Contains("Target"));
-            return ((RefType)property?.TypeUsage?.EdmType)?.ElementType.KeyProperties;
-        }
+			navigationProperties.ForEach(navigationProperty =>
+			{
+				if (navigationProperty.ToEndMember.RelationshipMultiplicity == RelationshipMultiplicity.Many) return;
+				navigationProperty.GetNavigationForeignKeys(propertyMappings, keyProperties);
+			});
 
-        private static Commons.Mapping.PropertyMapping GetPropertyMapping(this ScalarPropertyMapping propertyMapping,
-            IEnumerable<EdmProperty> keyProperties)
-        {
-            return new Commons.Mapping.PropertyMapping
-            {
-                ColumnName = propertyMapping.Column.Name,
-                PropertyName = propertyMapping.Property.Name,
-                IsPk = keyProperties.Any(prop => prop.Name.Equals(propertyMapping.Column.Name)),
-                IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
-                                || propertyMapping.Column.IsStoreGeneratedComputed
-            };
-        }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mapping"></param>
-        /// <returns></returns>
-        private static string GetTableName(this MappingFragment mapping)
-        {
-            var entitySet = mapping.StoreEntitySet;
-            return (string)entitySet.MetadataProperties["Table"].Value ?? entitySet.Name;
-        }
+			return propertyMappings;
+		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mapping"></param>
-        /// <returns></returns>
-        private static string GetTableSchema(this MappingFragment mapping)
-        {
-            var entitySet = mapping.StoreEntitySet;
-            return (string)entitySet.MetadataProperties["Schema"].Value ?? entitySet.Schema;
-        }
+		private static Commons.Mapping.PropertyMapping GetPropertyMapping(this ScalarPropertyMapping propertyMapping,
+			IEnumerable<EdmProperty> keyProperties)
+		{
+			return new Commons.Mapping.PropertyMapping
+			{
+				ColumnName = propertyMapping.Column.Name,
+				PropertyName = propertyMapping.Property.Name,
+				IsPk = keyProperties.Any(prop => prop.Name.Equals(propertyMapping.Column.Name)),
+				IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
+								|| propertyMapping.Column.IsStoreGeneratedComputed
+			};
+		}
 
-        /// <summary>
-        /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private static EntitySetMapping GetEntityMapping<TEntity>(this IObjectContextAdapter context, Type type = null) where TEntity : class
-        {
-            var collectionType = type ?? typeof(TEntity);
-            var metadata = context.ObjectContext.MetadataWorkspace;
-            var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
-            var entityType = metadata
-                .GetItems<EntityType>(DataSpace.OSpace)
-                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == collectionType);
-            if (entityType == null)
-                throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		private static IEnumerable<IPropertyMapping> GetAssociationForeignKeys(this EntitySetMapping entitySetMapping,
+			EntityMapping entityMapping, IEnumerable<EdmProperty> keyProperties)
+		{
+			var associations = entitySetMapping.ContainerMapping.AssociationSetMappings
+				.Where(association => association.StoreEntitySet.Name == entityMapping.TableName
+									  && association.StoreEntitySet.Schema == entityMapping.Schema)
+				.ToList();
 
-            var entitySet = metadata
-                .GetItems<EntityContainer>(DataSpace.CSpace)
-                .Single()
-                .EntitySets
-                .Single(s => s.ElementType.Name == entityType.Name);
+			var foreingKeys = new List<IPropertyMapping>();
+			foreach (var association in associations)
+			{
+				foreach (var propertyMapping in association.SourceEndMapping.PropertyMappings)
+				{
+					foreingKeys.Add(new Commons.Mapping.PropertyMapping
+					{
+						ColumnName = propertyMapping.Column.Name,
+						PropertyName = propertyMapping.Property.Name,
+						IsFk = true,
+						IsHierarchyMapping = false,
+						IsPk = keyProperties
+							.Any(prop => prop.Name.Equals(propertyMapping.Column.Name)),
+						IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
+										|| propertyMapping.Column.IsStoreGeneratedComputed,
+						ForeignKeyName = $"{association.AssociationSet.Name}_{propertyMapping.Property.Name}"
 
-            var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
-                .Single()
-                .EntitySetMappings
-                .Single(s => s.EntitySet == entitySet);
+					});
+				}
+			}
 
-            return mapping;
-        }
-    }
+			return foreingKeys;
+		}
+
+		private static void GetNavigationForeignKeys(this NavigationProperty navigationProperty,
+			ICollection<IPropertyMapping> propertyMappings, IEnumerable<EdmProperty> keyProperties)
+		{
+			var association = navigationProperty.ToEndMember.DeclaringType as AssociationType;
+			var refConst = association?.ReferentialConstraints.ToList();
+
+			if (refConst != null && refConst.Any())
+			{
+				refConst.ForEach(constraint =>
+				{
+					var columnName = constraint.ToProperties.First().Name;
+					var detinationProp = association.ReferentialConstraints.First().FromProperties.First().Name;
+					var propertyMapping = propertyMappings
+							.SingleOrDefault(pMap => pMap.ColumnName.Equals(columnName))
+						as Commons.Mapping.PropertyMapping;
+
+					if (propertyMapping == null) return;
+					propertyMapping.IsFk = true;
+					propertyMapping.IsPk = keyProperties
+						.Any(prop => prop.Name.Equals(columnName));
+					propertyMapping.ForeignKeyName = $"{association.Name}_{detinationProp}";
+				});
+			}
+		}
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="mapping"></param>
+		/// <returns></returns>
+		private static string GetTableName(this MappingFragment mapping)
+		{
+			var entitySet = mapping.StoreEntitySet;
+			return (string)entitySet.MetadataProperties["Table"].Value ?? entitySet.Name;
+		}
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="mapping"></param>
+		/// <returns></returns>
+		private static string GetTableSchema(this MappingFragment mapping)
+		{
+			var entitySet = mapping.StoreEntitySet;
+			return (string)entitySet.MetadataProperties["Schema"].Value ?? entitySet.Schema;
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <typeparam name="TEntity"></typeparam>
+		/// <param name="context"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		private static EntitySetMapping GetEntityMapping<TEntity>(this IObjectContextAdapter context, Type type = null) where TEntity : class
+		{
+			var collectionType = type ?? typeof(TEntity);
+			var metadata = context.ObjectContext.MetadataWorkspace;
+			var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
+			var entityType = metadata
+				.GetItems<EntityType>(DataSpace.OSpace)
+				.SingleOrDefault(e => objectItemCollection.GetClrType(e) == collectionType);
+			if (entityType == null)
+				throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
+
+			var entitySet = metadata
+				.GetItems<EntityContainer>(DataSpace.CSpace)
+				.Single()
+				.EntitySets
+				.Single(s => s.ElementType.Name == entityType.Name);
+
+			var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
+				.Single()
+				.EntitySetMappings
+				.Single(s => s.EntitySet == entitySet);
+
+			return mapping;
+		}
+	}
 }
