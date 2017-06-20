@@ -82,6 +82,7 @@
     <Compile Include="Model\Role.cs" />
     <Compile Include="Model\SecondKeyEntity.cs" />
     <Compile Include="Model\SimpleModel.cs" />
+    <Compile Include="Model\VipClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

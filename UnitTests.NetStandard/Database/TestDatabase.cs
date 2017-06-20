@@ -30,7 +30,8 @@ namespace UnitTests.NetStandard.Database
                 .HasDiscriminator<string>("Discriminator")
                 .HasValue<Person>("Person")
                 .HasValue<Employee>("Employee")
-                .HasValue<Client>("Client");
+                .HasValue<Client>("Client")
+                .HasValue<VipClient>("VipClient");
         }
     }
 }
