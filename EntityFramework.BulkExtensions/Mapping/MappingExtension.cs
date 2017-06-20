@@ -152,7 +152,7 @@ namespace EntityFramework.BulkExtensions.Mapping
             var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
             var entityType = metadata
                 .GetItems<EntityType>(DataSpace.OSpace)
-                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity)) as EdmType;
+                .SingleOrDefault(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
             if (entityType == null)
                 throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
