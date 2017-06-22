@@ -40,8 +40,16 @@ namespace EntityFramework.BulkExtensions.Commons.BulkOperations
                     : null;
 
                 //Create temporary table.
-                context.ExecuteSqlCommand(context.EntityMapping
-                    .BuildStagingTableCommand(stagingTableName, operation, options));
+                var stagingTableCommand = context.EntityMapping
+                    .BuildStagingTableCommand(stagingTableName, operation, options);
+
+                if (string.IsNullOrEmpty(stagingTableCommand))
+                {
+                    context.Rollback();
+                    return SqlHelper.NoRowsAffected;
+                }
+
+                context.ExecuteSqlCommand(stagingTableCommand);
 
                 //Bulk inset data to temporary staging table.
                 context.BulkInsertToTable(entityList, stagingTableName, operation, options);

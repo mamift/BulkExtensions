@@ -13,6 +13,8 @@ namespace UnitTests.NetStandard.Database
         public DbSet<CustomSchemaEntity> CustomSchemaEntities { get; set; }
         public DbSet<NotIncrementIdEntity> NotIncrementIdEntity { get; set; }
         public DbSet<ComputedEntity> ComputedEntity { get; set; }
+        public DbSet<IdentityOnlyAutoEntity> IdentityOnlyAutoEntity { get; set; }
+        public DbSet<IdentityOnlyEntity> IdentityOnlyEntity { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

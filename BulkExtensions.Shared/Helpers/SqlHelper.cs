@@ -17,6 +17,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         private const string Source = "Source";
         private const string Target = "Target";
         internal const string Identity = "Bulk_Identity";
+        internal const int NoRowsAffected = 0;
 
         /// <summary>
         ///
@@ -43,15 +44,22 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         {
             var paramList = mapping
                 .GetPropertiesByOperation(operationType)
+                .ToList();
+
+            if (paramList.All(s => s.IsPk && s.IsDbGenerated) &&
+                operationType == Operation.Update)
+                return null;
+
+            var paramColumns = paramList
                 .Select(column => $"{Source}.[{column.ColumnName}]")
                 .ToList();
 
             if (mapping.WillOutputGeneratedValues(options))
             {
-                paramList.Add($"1 as [{Identity}]");
+                paramColumns.Add($"1 as [{Identity}]");
             }
 
-            var paramListConcatenated = string.Join(", ", paramList);
+            var paramListConcatenated = string.Join(", ", paramColumns);
 
             return $"SELECT TOP 0 {paramListConcatenated} INTO {tableName} FROM {mapping.FullTableName} AS A " +
                    $"LEFT JOIN {mapping.FullTableName} AS {Source} ON 1 = 2";
@@ -138,17 +146,22 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         {
             var command = new StringBuilder();
             var parameters = new List<string>();
+            var properties = mapping.Properties
+                .Where(propertyMapping => !propertyMapping.IsDbGenerated)
+                .Where(propertyMapping => !propertyMapping.IsHierarchyMapping)
+                .ToList();
 
-            command.Append("WHEN MATCHED THEN UPDATE SET ");
-
-            foreach (var column in mapping.Properties)
+            if (properties.Any())
             {
-                if (column.IsDbGenerated || column.IsHierarchyMapping) continue;
+                command.Append("WHEN MATCHED THEN UPDATE SET ");
 
-                parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
+                foreach (var column in mapping.Properties)
+                {
+                    parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
+                }
+
+                command.Append(string.Join(", ", parameters) + " ");
             }
-
-            command.Append(string.Join(", ", parameters) + " ");
 
             return command.ToString();
         }
@@ -158,21 +171,25 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             var command = new StringBuilder();
             var columns = new List<string>();
             var values = new List<string>();
+            var properties = mapping.Properties
+                .Where(propertyMapping => !propertyMapping.IsDbGenerated)
+                .ToList();
 
-            command.Append(" WHEN NOT MATCHED BY TARGET THEN INSERT (");
-
-            foreach (var column in mapping.Properties)
+            command.Append(" WHEN NOT MATCHED BY TARGET THEN INSERT ");
+            if (properties.Any())
             {
-                if (column.IsDbGenerated) continue;
+                foreach (var column in properties)
+                {
+                    columns.Add($"[{column.ColumnName}]");
+                    values.Add($"[{Source}].[{column.ColumnName}]");
+                }
 
-                columns.Add($"[{column.ColumnName}]");
-                values.Add($"[{Source}].[{column.ColumnName}]");
+                command.Append($"({string.Join(", ", columns)}) VALUES ({string.Join(", ", values)})");
             }
-
-            command.Append(string.Join(", ", columns));
-            command.Append(") VALUES (");
-            command.Append(string.Join(", ", values));
-            command.Append(")");
+            else
+            {
+                command.Append("DEFAULT VALUES");
+            }
 
             return command.ToString();
         }
