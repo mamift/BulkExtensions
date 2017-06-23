@@ -25,7 +25,7 @@ It works as extension methods of the DbContext class and is very simple to use. 
 - New feature: Support for computed columns(with support for outputting computed values);
 - Fixed a bug with tables that all columns are database generated;
 - Fixed a bug with TPH;
-- Fixed a bug when the lib tries to rollback a disposed transaction;
+- Fixed a bug where the operation tries to rollback a disposed transaction;
 - Improved performance on tables with indexes;
 - Unified operations inner workings for better testing and maintainability;
    
