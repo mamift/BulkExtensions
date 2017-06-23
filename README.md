@@ -46,6 +46,17 @@ context.BulkDelete(entities);
 
 context.BulkInsert(entities, InsertOptions.OutputIdentity);
 context.BulkInsertOrUpdate(entities, InsertOptions.OutputIdentity);
+
+//Computed columns are populated by adding the optional parammeter
+
+context.BulkInsert(entityList, InsertOptions.OutputComputed);
+context.BulkInsertOrUpdate(entityList, InsertOptions.OutputComputed);
+context.BulkUpdate(entityList, UpdateOptions.OutputComputed);
+
+//It is possible to combine options
+context.BulkInsert(entityList, InsertOptions.OutputIdentity | InsertOptions.OutputComputed);
+context.BulkInsertOrUpdate(entityList, InsertOptions.OutputIdentity | InsertOptions.OutputComputed);
+
 ```
 
 ## Examples
