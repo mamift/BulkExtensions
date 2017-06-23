@@ -54,7 +54,7 @@ namespace EntityFramework.BulkExtensions.Extensions
 		{
 			foreach (var wrapper in entries.SelectMany(entryGroup => entryGroup.Select(entry => entry)))
 			{
-				if (wrapper.State.HasFlag(EntryState.Added | EntryState.Modified))
+				if (wrapper.State.HasFlag(EntryState.Added) || wrapper.State.HasFlag(EntryState.Modified))
 					context.Set(wrapper.EntitySetType).Attach(wrapper.Entity);
 				else if (wrapper.State.HasFlag(EntryState.Deleted))
 					context.Entry(wrapper.Entity).State = EntityState.Detached;
@@ -64,7 +64,7 @@ namespace EntityFramework.BulkExtensions.Extensions
 				.GetObjectStateEntries(EntityState.Added)
 				.Where(entry => entry.IsRelationship);
 
-			foreach (var objectStateEntry in relationshipObjects)
+			foreach (var objectStateEntry in relationshipObjects) 
 			{
 				objectStateEntry.AcceptChanges();
 			}
@@ -81,11 +81,10 @@ namespace EntityFramework.BulkExtensions.Extensions
 				if (relatedEnd is EntityReference related)
 				{
 					var entityKeyValues = related.EntityKey?.EntityKeyValues;
-					if (entityKeyValues != null)
-						entityKeyValues.ToList().ForEach(foreignKey =>
-						{
-							foreignKeys[$"{related.RelationshipSet.Name}_{foreignKey.Key}"] = foreignKey.Value;
-						});
+				    entityKeyValues?.ToList().ForEach(foreignKey =>
+				    {
+				        foreignKeys[$"{related.RelationshipSet.Name}_{foreignKey.Key}"] = foreignKey.Value;
+				    });
 				}
 			}
 

@@ -95,13 +95,18 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
         {
             var mappings = propertyMappings as IList<IPropertyMapping> ?? propertyMappings.ToList();
             var columnNames = mappings.Select(property => property.ColumnName);
-            var command = $"SELECT {Identity}, {string.Join(", ", columnNames)} FROM {outputTableName}";
+            var command = $"SELECT {Identity}, {string.Join(", ", columnNames)} FROM {outputTableName}";            
 
             using (var reader = context.SqlQuery(command))
             {
                 while (reader.Read())
                 {
-                    var item = items.ElementAt((int)reader[Identity]);
+                    object item = items.ElementAt((int)reader[Identity]);
+
+                    if (item is EntryWrapper wrapper)
+                    {
+                        item = wrapper.Entity;
+                    }
 
                     foreach (var propertyMapping in mappings)
                     {
@@ -111,7 +116,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
                             propertyInfo.SetValue(item, reader[propertyMapping.ColumnName], null);
 
                         else
-                            throw new Exception();
+                            throw new Exception("Field not existent");
                     }
                 }
             }
