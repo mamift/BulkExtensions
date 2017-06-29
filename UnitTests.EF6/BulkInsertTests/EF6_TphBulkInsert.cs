@@ -292,6 +292,23 @@ namespace UnitTests.EF6.BulkInsertTests
 
         #endregion
 
+        [Fact]
+        public void TestAffectedRowsCount_Child()
+        {
+            var clients = new List<VipClient>();
+            for (int i = 0; i < 10; i++)
+            {
+                clients.Add(new VipClient
+                {
+                    Name = Helper.RandomString(10),
+                    Birthday = DateTime.Today,
+                    Category = Helper.RandomString(10)
+                });
+            }
+            var rowsCount = _context.BulkInsert(clients);
+            Assert.Equal(rowsCount, clients.Count);
+        }
+
         public void Dispose()
         {
             ClearTable();

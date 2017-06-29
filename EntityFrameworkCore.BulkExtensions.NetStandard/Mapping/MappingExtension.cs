@@ -22,9 +22,9 @@ namespace EntityFramework.BulkExtensions.Mapping
                 throw new BulkException(@"Entity is not being mapped by Entity Framework. Verify your EF configuration.");
 
             var relational = entityType.Relational();
-            var baseType = entityType.BaseType ?? entityType;
+            var baseType = entityType.GetSetType();
             var hierarchy = context.Model.GetEntityTypes()
-                .Where(type => type.BaseType == null ? type == baseType : type.BaseType == baseType)
+                .Where(type => type.BaseType == null ? type == baseType : type.GetSetType() == baseType)
                 .ToList();
             var properties = hierarchy.GetPropertyMappings().ToList();
 
@@ -34,7 +34,8 @@ namespace EntityFramework.BulkExtensions.Mapping
                 Schema = relational.Schema
             };
 
-            if (hierarchy.Count > 1)
+            if (hierarchy.Count > 1 &&
+                !properties.Any(property => property.ColumnName.Equals(relational.DiscriminatorProperty.Name)))
             {
                 entityMapping.HierarchyMapping = GetHierarchyMappings(hierarchy);
                 properties.Add(new PropertyMapping
@@ -46,6 +47,11 @@ namespace EntityFramework.BulkExtensions.Mapping
 
             entityMapping.Properties = properties;
             return entityMapping;
+        }
+
+        private static IEntityType GetSetType(this IEntityType entityType)
+        {
+            return entityType.BaseType == null ? entityType : entityType.BaseType.GetSetType();
         }
 
         private static Dictionary<string, string> GetHierarchyMappings(IEnumerable<IEntityType> hierarchy)

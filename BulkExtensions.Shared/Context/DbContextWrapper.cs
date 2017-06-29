@@ -7,6 +7,7 @@ namespace EntityFramework.BulkExtensions.Commons.Context
     {
         private const int DefaultTimeout = 60;
         private const int DefaultBatchSize = 5000;
+        private const int NoRowsAffected = 0;
 
         internal DbContextWrapper(IDbConnection connection, IDbTransaction transaction, IEntityMapping entityMapping, int? commandTimeout)
         {
@@ -36,18 +37,24 @@ namespace EntityFramework.BulkExtensions.Commons.Context
 
         public int ExecuteSqlCommand(string command)
         {
+            if (string.IsNullOrEmpty(command))
+                return NoRowsAffected;
             var sqlCommand = CreateCommand(command);
             return sqlCommand.ExecuteNonQuery();
         }
 
         public IDataReader SqlQuery(string command)
         {
+            if (string.IsNullOrEmpty(command))
+                return null;
             var sqlCommand = CreateCommand(command);
             return sqlCommand.ExecuteReader();
         }
 
         private IDbCommand CreateCommand(string command)
         {
+            if (string.IsNullOrEmpty(command))
+                return null;
             var sqlCommand = Connection.CreateCommand();
             sqlCommand.Transaction = Transaction;
             sqlCommand.CommandTimeout = Timeout;

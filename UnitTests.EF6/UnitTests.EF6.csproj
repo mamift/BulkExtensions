@@ -65,6 +65,7 @@
     <Compile Include="BulkInsertTests\EF6_CompositeKeyBulkInsert.cs" />
     <Compile Include="BulkInsertTests\EF6_ComputedBulkInsert.cs" />
     <Compile Include="BulkInsertTests\EF6_CustomSchemaBulkInsert.cs" />
+    <Compile Include="BulkInsertTests\EF6_IdentityOnlyBulkInsert.cs" />
     <Compile Include="BulkInsertTests\EF6_NotIncrementBulkInsert.cs" />
     <Compile Include="BulkInsertTests\EF6_SimpleEntityBulkInsert.cs" />
     <Compile Include="BulkInsertTests\EF6_TphBulkInsert.cs" />
@@ -77,11 +78,13 @@
     <Compile Include="Model\CustomSchemaEntity.cs" />
     <Compile Include="Model\Employee.cs" />
     <Compile Include="Model\FirstKeyEntity.cs" />
+    <Compile Include="Model\IdentityOnlyEntity.cs" />
     <Compile Include="Model\NotIncrementIdEntity.cs" />
     <Compile Include="Model\Person.cs" />
     <Compile Include="Model\Role.cs" />
     <Compile Include="Model\SecondKeyEntity.cs" />
     <Compile Include="Model\SimpleModel.cs" />
+    <Compile Include="Model\VipClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

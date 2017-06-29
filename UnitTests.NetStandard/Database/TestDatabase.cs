@@ -13,6 +13,8 @@ namespace UnitTests.NetStandard.Database
         public DbSet<CustomSchemaEntity> CustomSchemaEntities { get; set; }
         public DbSet<NotIncrementIdEntity> NotIncrementIdEntity { get; set; }
         public DbSet<ComputedEntity> ComputedEntity { get; set; }
+        public DbSet<IdentityOnlyAutoEntity> IdentityOnlyAutoEntity { get; set; }
+        public DbSet<IdentityOnlyEntity> IdentityOnlyEntity { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,7 +32,8 @@ namespace UnitTests.NetStandard.Database
                 .HasDiscriminator<string>("Discriminator")
                 .HasValue<Person>("Person")
                 .HasValue<Employee>("Employee")
-                .HasValue<Client>("Client");
+                .HasValue<Client>("Client")
+                .HasValue<VipClient>("VipClient");
         }
     }
 }

@@ -1,11 +1,9 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace UnitTests.NetStandard.Model
 {
     public class SimpleModel
     {
-        [Key]
         public int Id { get; set; }
 
         public string StringProperty { get; set; }
