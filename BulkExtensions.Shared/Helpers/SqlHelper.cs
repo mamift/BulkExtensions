@@ -147,6 +147,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             var command = new StringBuilder();
             var parameters = new List<string>();
             var properties = mapping.Properties
+                .Where(propertyMapping => !propertyMapping.IsPk)
                 .Where(propertyMapping => !propertyMapping.IsDbGenerated)
                 .Where(propertyMapping => !propertyMapping.IsHierarchyMapping)
                 .ToList();
@@ -155,7 +156,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             {
                 command.Append("WHEN MATCHED THEN UPDATE SET ");
 
-                foreach (var column in mapping.Properties)
+                foreach (var column in properties)
                 {
                     parameters.Add($"[{Target}].[{column.ColumnName}] = [{Source}].[{column.ColumnName}]");
                 }

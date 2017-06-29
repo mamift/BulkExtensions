@@ -37,7 +37,11 @@ namespace EntityFramework.BulkExtensions.Mapping
                     .ToList();
 
                 entityMapping.HierarchyMapping = GetHierarchyMappings(typeMappings);
-                properties.Add(GetDiscriminatorProperty(typeMappings));
+                var discriminator = GetDiscriminatorProperty(typeMappings);
+                if (!properties.Any(mapping => mapping.ColumnName.Equals(discriminator.ColumnName)))
+                {
+                    properties.Add(discriminator);
+                }
             }
 
             entityMapping.Properties = properties;

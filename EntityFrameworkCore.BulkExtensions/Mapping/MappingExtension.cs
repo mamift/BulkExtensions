@@ -34,7 +34,8 @@ namespace EntityFramework.BulkExtensions.Mapping
                 Schema = relational.Schema
             };
 
-            if (hierarchy.Count > 1)
+            if (hierarchy.Count > 1 &&
+                !properties.Any(property => property.ColumnName.Equals(relational.DiscriminatorProperty.Name)))
             {
                 entityMapping.HierarchyMapping = GetHierarchyMappings(hierarchy);
                 properties.Add(new PropertyMapping
