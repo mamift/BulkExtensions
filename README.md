@@ -20,19 +20,14 @@ It works as extension methods of the DbContext class and is very simple to use. 
 - For EF6 you can use it with .NetFramewok 4.5+;
 - For EFCore you can use it with .NetFramewok 4.5.1+ or .NetCore1.0+;
    
-### Changes in version 1.4
+### Release notes
    
-- New feature: Support for computed columns(with support for outputting computed values);
-- Fixed a bug with tables that all columns are database generated;
-- Fixed a bug with TPH;
-- Fixed a bug where the operation tries to rollback a disposed transaction;
-- Improved performance on tables with indexes;
-- Unified operations inner workings for better testing and maintainability;
+You can see the release notes on the [Releases](https://github.com/tiagoln/BulkExtensions/releases) page   
    
 ### Installation
 You can install it using the nuget package for your EF version:
-- For EF6: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions">EntityFramework.BulkExtensions</a><br>
-- For EFCore: <a href="https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore">EntityFramework.BulkExtensions.EFCore</a><br>
+- For EF6: [EntityFramework.BulkExtensions](https://www.nuget.org/packages/EntityFramework.BulkExtensions)
+- For EFCore: [EntityFramework.BulkExtensions.EFCore](https://www.nuget.org/packages/EntityFramework.BulkExtensions.EFCore)
 
 ## How to use it
 You just need to call the methods bellow for the feature you want to use passing the collection of entities to perform the operation.
