@@ -21,7 +21,7 @@ namespace UnitTests.NetStandard.Database
 //            optionsBuilder.UseSqlServer(
 //                @"Data Source=tcp:192.168.0.142,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
             optionsBuilder.UseSqlServer(
-                @"Data Source=tcp:10.0.0.192,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
+                @"Data Source=tcp:10.0.0.194,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

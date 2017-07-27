@@ -29,7 +29,7 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
             var schema = string.IsNullOrEmpty(mapping.Schema?.Trim())
                 ? string.Empty
                 : $"[{mapping.Schema}].";
-            return $"{schema}[#{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
+            return $"{schema}[_{mapping.TableName}_{GuidHelper.GetRandomTableGuid()}]";
         }
 
         /// <summary>
