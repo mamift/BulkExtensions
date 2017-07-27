@@ -7,6 +7,9 @@
     <AssemblyTitle>EntityFramework.BulkExtensions.EFCore</AssemblyTitle>
     <Description>Bulk operations extension library for Entity Framework.</Description>
     <Copyright>Copyright © Tiago L. da Nóbrega 2017</Copyright>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>EntityFramework.BulkExtensions.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore">
