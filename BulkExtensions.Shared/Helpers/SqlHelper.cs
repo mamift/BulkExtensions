@@ -197,11 +197,13 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         internal static string BuildMergeOutputSet(string outputTableName, IEnumerable<IPropertyMapping> properties)
         {
-            var propertyMappings = properties as IList<IPropertyMapping> ?? properties.ToList();
+            var propertyMappings = (properties as IList<IPropertyMapping> ?? properties.ToList())
+                .Where(x=>!x.IsCt);
             var insertedColumns = string.Join(", ", propertyMappings.Select(property => $"INSERTED.{property.ColumnName}"));
             var outputColumns = string.Join(", ", propertyMappings.Select(property => property.ColumnName));
+            var insertedColumnDelimiter = propertyMappings.Any() ? ", " : String.Empty;
 
-            return $" OUTPUT {Source}.{Identity}, {insertedColumns} INTO {outputTableName} ({Identity}, {outputColumns})";
+            return $" OUTPUT {Source}.{Identity}{insertedColumnDelimiter}{insertedColumns} INTO {outputTableName} ({Identity}{insertedColumnDelimiter}{outputColumns})";
         }
 
         /// <summary>

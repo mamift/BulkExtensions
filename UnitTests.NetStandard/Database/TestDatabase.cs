@@ -12,14 +12,15 @@ namespace UnitTests.NetStandard.Database
         public DbSet<CompositeKeyEntity> CompositeKeyEntity { get; set; }
         public DbSet<CustomSchemaEntity> CustomSchemaEntities { get; set; }
         public DbSet<NotIncrementIdEntity> NotIncrementIdEntity { get; set; }
+        public DbSet<ConcurrencyTokenEntity> ConcurrencyTokenEntity { get; set; }
         public DbSet<ComputedEntity> ComputedEntity { get; set; }
         public DbSet<IdentityOnlyAutoEntity> IdentityOnlyAutoEntity { get; set; }
         public DbSet<IdentityOnlyEntity> IdentityOnlyEntity { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-//            optionsBuilder.UseSqlServer(
-//                @"Data Source=tcp:192.168.0.142,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
+            //            optionsBuilder.UseSqlServer(
+            //                @"Data Source=tcp:192.168.0.142,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
             optionsBuilder.UseSqlServer(
                 @"Data Source=tcp:10.0.0.192,1433;Initial Catalog=UnitTests;User ID=sa;Password=sa;");
         }

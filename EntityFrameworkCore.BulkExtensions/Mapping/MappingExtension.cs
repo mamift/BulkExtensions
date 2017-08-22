@@ -72,6 +72,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                     ColumnName = property.Relational().ColumnName,
                     IsPk = property.IsPrimaryKey(),
                     IsFk = property.IsForeignKey(),
+                    IsCt = property.IsConcurrencyToken,
                     IsDbGenerated = property.ValueGenerated != ValueGenerated.Never
                 });
         }

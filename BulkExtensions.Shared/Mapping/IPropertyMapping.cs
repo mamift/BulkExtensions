@@ -6,6 +6,7 @@
         string ColumnName { get; }
         bool IsPk { get; }
         bool IsFk { get; }
+        bool IsCt { get; }
         bool IsHierarchyMapping { get; }
         bool IsDbGenerated { get; }
     }
